@@ -1,0 +1,27 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+.env.local
+*.egg-info/
+dist/
+build/
+personaldoc/
+
+# experiment artifacts
+checkpoints/
+adapters/
+*.lora
+wandb/
+
+# generated logs (regenerate via redteam.py)
+data/attack_log.jsonl
+results/*.json
+results/*.png
+
+# editor
+.vscode/
+.idea/
+.DS_Store

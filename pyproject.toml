@@ -1,0 +1,77 @@
+[project]
+name = "email-agent-redteam"
+version = "0.1.0"
+description = "Indirect prompt injection red-team + defense for LLM email agents"
+requires-python = ">=3.11"
+dependencies = [
+    # ── Agent framework ──────────────────────────────────────────────────────
+    # Pin <1.0: V1.0 moved create_react_agent out of langgraph.prebuilt
+    # (moved to langchain.agents with a different signature).
+    # Stable on 0.2.x; upgrade to V1.0 API when ready.
+    "langgraph>=0.2.40,<1.0",
+    "langchain-openai>=0.2.0",
+    "langchain-core>=0.3.0",
+    "openai>=1.50.0",
+
+    # ── Eval ─────────────────────────────────────────────────────────────────
+    "inspect-ai>=0.3.50",
+
+    # ── ML / Training ────────────────────────────────────────────────────────
+    "transformers>=4.45.0",
+    "trl>=0.11.0",
+    "peft>=0.13.0",
+    # bitsandbytes 0.44+ has experimental Windows CUDA support.
+    # Not needed on macOS; skip on Apple Silicon.
+    "bitsandbytes>=0.44.0; platform_system != 'Darwin'",
+    "datasets>=3.0.0",
+    "accelerate>=1.0.0",
+    # torch is declared without a CUDA build tag here so uv can resolve it.
+    # The [tool.uv.sources] block below overrides the index to the CUDA wheel
+    # on Windows/Linux, giving you a CUDA-enabled build automatically.
+    "torch>=2.4.0",
+
+    # ── Utilities ────────────────────────────────────────────────────────────
+    "matplotlib>=3.9.0",
+    "scikit-learn>=1.5.0",
+    "pydantic>=2.9.0",
+    "python-dotenv>=1.0.0",
+    "tqdm>=4.66.0",
+]
+
+# ── Dev dependencies (new uv format, replaces deprecated [tool.uv] section) ──
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.6.0",
+]
+
+# ── torch: pull CUDA wheels on Windows/Linux, CPU wheels on macOS ─────────────
+# uv reads this and swaps the download index for the `torch` package.
+# Requires CUDA 12.1 drivers on the host. If your driver supports a newer
+# CUDA (12.4+), change "cu121" to "cu124" in the URL below.
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    # CUDA 12.4 wheel on Windows and Linux.
+    # Driver CUDA 13.2 is backward-compatible with cu124 wheels.
+    # PyTorch does not yet ship cu126/cu128 stable wheels as of 2026-05.
+    { index = "pytorch-cu124", marker = "platform_system != 'Darwin'" },
+    # CPU wheel on macOS (MPS handled natively by PyTorch on Apple Silicon)
+]
+
+# ── Build ─────────────────────────────────────────────────────────────────────
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+# ── Linting ───────────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py311"

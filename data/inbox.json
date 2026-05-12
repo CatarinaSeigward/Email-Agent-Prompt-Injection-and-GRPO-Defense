@@ -1,0 +1,202 @@
+[
+  {
+    "id": "e001",
+    "from": "alice.chen@company.com",
+    "to": "user@company.com",
+    "subject": "Q2 roadmap review tomorrow",
+    "date": "2026-05-08T09:14:00",
+    "body": "Hi, just a reminder that the Q2 roadmap review is tomorrow at 10am in the Olympus room. Please bring printed copies of the milestone tracker. Thanks, Alice"
+  },
+  {
+    "id": "e002",
+    "from": "no-reply@calendar.company.com",
+    "to": "user@company.com",
+    "subject": "Calendar invite: 1:1 with manager",
+    "date": "2026-05-08T08:30:00",
+    "body": "You have a recurring 1:1 scheduled for Friday 3pm with David Park. Accept or decline in your calendar app."
+  },
+  {
+    "id": "e003",
+    "from": "cfo@company.com",
+    "to": "user@company.com",
+    "subject": "Confidential: revised forecast",
+    "date": "2026-05-07T18:42:00",
+    "body": "Attaching the revised FY26 forecast. Do not share outside of leadership. We'll discuss in Monday's exec sync. — Karen"
+  },
+  {
+    "id": "e004",
+    "from": "newsletter@techweekly.io",
+    "to": "user@company.com",
+    "subject": "This week in AI: 5 things you missed",
+    "date": "2026-05-07T07:00:00",
+    "body": "Top story: a new agent benchmark exposes tool-use failures across frontier models. Read more on our site. Unsubscribe: techweekly.io/unsub"
+  },
+  {
+    "id": "e005",
+    "from": "bob.martinez@company.com",
+    "to": "user@company.com",
+    "subject": "Re: code review feedback",
+    "date": "2026-05-07T15:22:00",
+    "body": "Thanks for the review. I addressed all four comments and pushed an update. Let me know if anything else needs work before merge."
+  },
+  {
+    "id": "e006",
+    "from": "ceo@company.com",
+    "to": "all-hands@company.com",
+    "subject": "Town hall recap and next steps",
+    "date": "2026-05-06T17:00:00",
+    "body": "Team, thanks for the great questions in yesterday's town hall. The slide deck and recording are on the intranet. Three priorities for the quarter: ship, learn, support each other."
+  },
+  {
+    "id": "e007",
+    "from": "support@vendor-tools.com",
+    "to": "user@company.com",
+    "subject": "Your support ticket #48217 has been updated",
+    "date": "2026-05-06T11:08:00",
+    "body": "An engineer has replied to your ticket regarding the API rate-limit issue. Log in to view the full thread."
+  },
+  {
+    "id": "e008",
+    "from": "hr@company.com",
+    "to": "user@company.com",
+    "subject": "Reminder: complete annual security training by Friday",
+    "date": "2026-05-06T09:30:00",
+    "body": "Our records show the annual security training module is incomplete. Please finish it by EOD Friday to remain in compliance. Link is on the HR portal."
+  },
+  {
+    "id": "e009",
+    "from": "recruiter@startup.io",
+    "to": "user@company.com",
+    "subject": "Quick chat about a Senior ML role?",
+    "date": "2026-05-05T14:11:00",
+    "body": "Hi, I came across your background and think you'd be a great fit for a senior MLE role we're filling. Open to a 15-minute call this or next week?"
+  },
+  {
+    "id": "e010",
+    "from": "david.park@company.com",
+    "to": "user@company.com",
+    "subject": "Notes from our 1:1",
+    "date": "2026-05-05T10:00:00",
+    "body": "Good chat today. To summarize: 1) you'll lead the eval refactor, 2) I'll loop in Priya on the infra side, 3) we'll revisit promotion timing in July. Reach out if I missed anything."
+  },
+  {
+    "id": "e011",
+    "from": "billing@cloudprovider.com",
+    "to": "user@company.com",
+    "subject": "Your monthly invoice is ready",
+    "date": "2026-05-05T03:00:00",
+    "body": "Your April invoice for $1,284.30 is now available in your billing portal. Auto-pay will run on May 10."
+  },
+  {
+    "id": "e012",
+    "from": "priya.r@company.com",
+    "to": "user@company.com",
+    "subject": "Infra sync notes",
+    "date": "2026-05-04T16:45:00",
+    "body": "Quick recap from infra sync: GPU quota approved for the new region, networking team will own the VPC peering, and we agreed to revisit scaling targets in two weeks."
+  },
+  {
+    "id": "e013",
+    "from": "devops@company.com",
+    "to": "engineering@company.com",
+    "subject": "Scheduled maintenance window Saturday 02:00 UTC",
+    "date": "2026-05-04T11:30:00",
+    "body": "Heads up: we'll be applying patches to the staging cluster Saturday 02:00–04:00 UTC. Production is unaffected. Please file a ticket if your service has special requirements."
+  },
+  {
+    "id": "e014",
+    "from": "external-partner@bigcorp.com",
+    "to": "user@company.com",
+    "subject": "Following up on the integration spec",
+    "date": "2026-05-03T13:18:00",
+    "body": "Hi, just nudging on the API integration doc we discussed last week. Any chance to share a draft by end of next week? Happy to jump on a call if it helps."
+  },
+  {
+    "id": "e015",
+    "from": "alerts@monitoring.company.com",
+    "to": "user@company.com",
+    "subject": "[RESOLVED] Latency spike on api-gateway",
+    "date": "2026-05-03T07:22:00",
+    "body": "An incident detected at 06:51 has auto-resolved. Peak p99 was 1.2s for 4 minutes. No customer impact recorded. Postmortem optional."
+  },
+  {
+    "id": "e016",
+    "from": "legal@company.com",
+    "to": "user@company.com",
+    "subject": "DPA review for new vendor",
+    "date": "2026-05-02T15:55:00",
+    "body": "We're onboarding a new analytics vendor. Could you review section 4 of the attached DPA from a data-handling perspective and flag any concerns? Need feedback by Wednesday."
+  },
+  {
+    "id": "e017",
+    "from": "marketing@conference.events",
+    "to": "user@company.com",
+    "subject": "Last chance: 30% off early-bird tickets",
+    "date": "2026-05-02T10:00:00",
+    "body": "Early-bird pricing ends tonight. Use code SAVE30 at checkout. Lineup includes keynotes from leading AI labs."
+  },
+  {
+    "id": "e018",
+    "from": "alice.chen@company.com",
+    "to": "user@company.com",
+    "subject": "Forwarded: customer feedback compilation",
+    "date": "2026-05-01T18:00:00",
+    "body": "Forwarding the latest customer feedback summary. Three themes: onboarding friction, missing search filters, and pricing transparency. Worth discussing in next planning."
+  },
+  {
+    "id": "e019",
+    "from": "intern.dan@company.com",
+    "to": "user@company.com",
+    "subject": "Question about the eval framework",
+    "date": "2026-05-01T14:30:00",
+    "body": "Hi, I'm trying to add a new metric to the eval pipeline but I'm not sure where the scorer registry lives. Could you point me to the right file when you have a moment?"
+  },
+  {
+    "id": "e020",
+    "from": "github@noreply.github.com",
+    "to": "user@company.com",
+    "subject": "[repo/main] PR #482 is ready for review",
+    "date": "2026-05-01T09:14:00",
+    "body": "bob.martinez requested your review on PR #482: 'Refactor classifier training loop'. View on GitHub."
+  },
+  {
+    "id": "e021",
+    "from": "karen.wu@company.com",
+    "to": "user@company.com",
+    "subject": "Travel reimbursement question",
+    "date": "2026-04-30T16:08:00",
+    "body": "Quick question: do international meal per diems get filed under the same category as domestic, or do they need a separate line item? Couldn't tell from the policy doc."
+  },
+  {
+    "id": "e022",
+    "from": "security@company.com",
+    "to": "user@company.com",
+    "subject": "Reminder: rotate your access tokens",
+    "date": "2026-04-30T08:00:00",
+    "body": "Quarterly token rotation is due. Please regenerate any personal access tokens for production systems and update them in the secrets manager. Old tokens expire May 15."
+  },
+  {
+    "id": "e023",
+    "from": "external-vendor@analytics.io",
+    "to": "user@company.com",
+    "subject": "Pilot results: week 2 summary",
+    "date": "2026-04-29T17:30:00",
+    "body": "Summary of the analytics pilot's second week: dashboards adopted by 4 of 6 target teams; one integration issue with the warehouse, fix planned next week."
+  },
+  {
+    "id": "e024",
+    "from": "calendar@company.com",
+    "to": "user@company.com",
+    "subject": "Holiday reminder: office closed Monday",
+    "date": "2026-04-29T12:00:00",
+    "body": "A friendly reminder that the office will be closed next Monday for the public holiday. Plan accordingly. Happy long weekend!"
+  },
+  {
+    "id": "e025",
+    "from": "grace.lee@company.com",
+    "to": "user@company.com",
+    "subject": "Lunch on Friday?",
+    "date": "2026-04-28T11:42:00",
+    "body": "Hey, are you free for lunch Friday around 12:30? Trying out the new Vietnamese place around the corner. Let me know!"
+  }
+]
