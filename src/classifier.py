@@ -52,36 +52,67 @@ def _augment(text: str) -> list[str]:
 
 
 def build_dataset(seed: int = 17) -> tuple[list[dict], list[dict]]:
+    """Seed-grouped, category-stratified 80/20 split.
+
+    Two layers of leakage prevention:
+
+      1. Source-level grouping: every text derived from the SAME attack idea
+         lands in the same split. The 'source' is the underlying seed_id
+         (e.g. "A1-01") — NOT the (seed_id, round) tuple — because PAIR
+         round 0 reuses the seed body verbatim, so 'seed-A1-01' and
+         'log-A1-01-r0' are textually identical. Splitting at the round
+         level would put a near-clone in the test set.
+
+      2. Per-bucket hash dedup: within one seed_id bucket we still get
+         duplicates (seed body + log-round-0 body are identical strings).
+         Dedup with _hash() so each unique text contributes one sample.
+
+    Plus category stratification: 80/20 within each of the three attack
+    categories, so the test set always contains roughly 2 override + 2
+    hidden + 2 exfiltration seeds (instead of random 4/1/1-style draws).
+    """
     rng = random.Random(seed)
-    positives: dict[str, str] = {}
+
+    # seed_id -> list[str] of augmented texts (all rounds + variants pooled)
+    pos_buckets: dict[str, list[str]] = {}
+    # seed_id -> attack category (override / hidden_injection / exfiltration)
+    seed_categories: dict[str, str] = {}
+
+    # --- positives: seed attacks (1 row per seed) ---
+    seeds_path = DATA_DIR / "attack_seeds.jsonl"
+    for line in seeds_path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        s = json.loads(line)
+        sid = s["seed_id"]
+        seed_categories[sid] = s["category"]
+        pos_buckets.setdefault(sid, []).extend(_augment(s["body"]))
+
+    # --- positives: PAIR attack log, keyed by seed_id (NOT seed_id+round) ---
     log = DATA_DIR / "attack_log.jsonl"
     if log.exists():
         for line in log.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             row = json.loads(line)
+            sid = row["seed_id"]
+            seed_categories.setdefault(sid, row.get("category", "unknown"))
             body = row["attack_email"]["body"]
-            for aug in _augment(body):
-                positives[_hash(aug)] = aug
+            pos_buckets.setdefault(sid, []).extend(_augment(body))
 
-    # also include the seed bodies directly so we have positives even before
-    # the campaign runs (D8 happens after D6 logs are produced — but allow
-    # both orders so the script is reusable)
-    seeds_path = DATA_DIR / "attack_seeds.jsonl"
-    for line in seeds_path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        body = json.loads(line)["body"]
-        for aug in _augment(body):
-            positives[_hash(aug)] = aug
+    # dedup within each seed bucket (round-0 body == seed body, etc.)
+    for sid, texts in pos_buckets.items():
+        seen: dict[str, str] = {}
+        for t in texts:
+            seen[_hash(t)] = t
+        pos_buckets[sid] = list(seen.values())
 
-    negatives: dict[str, str] = {}
+    # --- negatives ---
+    neg_buckets: dict[str, list[str]] = {}
     inbox = json.loads((DATA_DIR / "inbox.json").read_text(encoding="utf-8"))
     for e in inbox:
-        for aug in _augment(e["body"]):
-            negatives[_hash(aug)] = aug
+        neg_buckets[f"inbox-{e['id']}"] = list({_hash(a): a for a in _augment(e["body"])}.values())
 
-    # synthesize a few extra benign tool-call-context strings
     benign_extras = [
         "Please reply to Grace's lunch invitation saying yes Friday 12:30 works.",
         "Forward the customer feedback summary to bob.martinez@company.com.",
@@ -89,20 +120,57 @@ def build_dataset(seed: int = 17) -> tuple[list[dict], list[dict]]:
         "Summarize the CFO email in two sentences.",
         "List the inbox and tell me which 3 emails are most urgent.",
     ]
-    for b in benign_extras:
-        negatives[_hash(b)] = b
+    for i, b in enumerate(benign_extras):
+        neg_buckets[f"extra-{i}"] = [b]
 
-    pos = [{"text": v, "label": 1} for v in positives.values()]
-    neg = [{"text": v, "label": 0} for v in negatives.values()]
-    rng.shuffle(pos); rng.shuffle(neg)
+    # --- stratified split: 80/20 within each attack category ---
+    by_category: dict[str, list[str]] = {}
+    for sid in pos_buckets:
+        by_category.setdefault(seed_categories.get(sid, "unknown"), []).append(sid)
 
-    n_test = max(1, int(0.2 * min(len(pos), len(neg))))
-    test = pos[:n_test] + neg[:n_test]
-    train = pos[n_test:] + neg[n_test:]
-    rng.shuffle(train); rng.shuffle(test)
-    print(f"dataset: train={len(train)} (pos={sum(r['label'] for r in train)}), "
-          f"test={len(test)} (pos={sum(r['label'] for r in test)})")
-    return train, test
+    test_pos_ids: set[str] = set()
+    for cat, sids in by_category.items():
+        rng.shuffle(sids)
+        n_test = max(1, int(0.2 * len(sids)))
+        test_pos_ids.update(sids[:n_test])
+
+    neg_ids = list(neg_buckets.keys())
+    rng.shuffle(neg_ids)
+    n_test_neg = max(1, int(0.2 * len(neg_ids)))
+    test_neg_ids = set(neg_ids[:n_test_neg])
+
+    train_rows: list[dict] = []
+    test_rows: list[dict] = []
+    for sid, texts in pos_buckets.items():
+        bucket = test_rows if sid in test_pos_ids else train_rows
+        bucket.extend({"text": t, "label": 1} for t in texts)
+    for sid, texts in neg_buckets.items():
+        bucket = test_rows if sid in test_neg_ids else train_rows
+        bucket.extend({"text": t, "label": 0} for t in texts)
+
+    rng.shuffle(train_rows)
+    rng.shuffle(test_rows)
+
+    # diagnostic: confirm stratification worked
+    test_cat_counts: dict[str, int] = {}
+    for sid in test_pos_ids:
+        cat = seed_categories.get(sid, "unknown")
+        test_cat_counts[cat] = test_cat_counts.get(cat, 0) + 1
+
+    n_train_pos_buckets = len(pos_buckets) - len(test_pos_ids)
+    n_train_neg_buckets = len(neg_buckets) - len(test_neg_ids)
+    print(
+        f"dataset: train={len(train_rows)} (pos={sum(r['label'] for r in train_rows)}), "
+        f"test={len(test_rows)} (pos={sum(r['label'] for r in test_rows)})"
+    )
+    print(
+        f"  source split: pos {n_train_pos_buckets}/{len(test_pos_ids)}  "
+        f"neg {n_train_neg_buckets}/{n_test_neg}  (train/test)"
+    )
+    print(
+        f"  test categories: " + " ".join(f"{c}={n}" for c, n in sorted(test_cat_counts.items()))
+    )
+    return train_rows, test_rows
 
 
 # ---------- training ----------
@@ -139,6 +207,12 @@ def train(epochs: int = 4, lr: float = 5e-5, batch_size: int = 8) -> dict:
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
         learning_rate=lr,
+        # Mild L2 regularisation. ModernBERT-base is 152M params over ~230
+        # train samples — without weight decay we observed train loss
+        # collapsing to 1e-8 (numerical noise) within 1 epoch. 0.01 is the
+        # standard HuggingFace default; it keeps the model from memorising
+        # patterns it can't generalise from.
+        weight_decay=0.01,
         eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
@@ -147,10 +221,12 @@ def train(epochs: int = 4, lr: float = 5e-5, batch_size: int = 8) -> dict:
         fp16=torch.cuda.is_available(),
         report_to=[],
     )
+    # NOTE: transformers >= 4.46 renamed `tokenizer` to `processing_class`
+    # in Trainer. Use the new name to stay compatible with current versions.
     trainer = Trainer(
         model=model, args=args, train_dataset=train_ds, eval_dataset=test_ds,
         data_collator=DataCollatorWithPadding(tok),
-        compute_metrics=compute_metrics, tokenizer=tok,
+        compute_metrics=compute_metrics, processing_class=tok,
     )
     trainer.train()
     metrics = trainer.evaluate()

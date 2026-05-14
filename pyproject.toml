@@ -17,8 +17,17 @@ dependencies = [
     "inspect-ai>=0.3.50",
 
     # ── ML / Training ────────────────────────────────────────────────────────
-    "transformers>=4.45.0",
-    "trl>=0.11.0",
+    # Pin <5.0: transformers 5.x changed _is_package_available() to return
+    # a (bool, version) tuple instead of a bool. trl 0.19 (and earlier)
+    # uses the return value as `if _vllm_available:`, which evaluates the
+    # tuple as truthy and triggers a hard vllm import that fails on
+    # Windows. Pinning to 4.x keeps the old API.
+    "transformers>=4.45.0,<5.0",
+    # trl >=0.18 for GRPOTrainer (DeepSeek-style group-relative PPO).
+    # Note: 0.11 → 0.18 has API breaks (e.g. DPOConfig.max_prompt_length
+    # removed, tokenizer→processing_class rename). src/dpo_train.py is
+    # already adjusted for these; src/grpo_train.py uses the new API.
+    "trl>=0.18,<0.20",
     "peft>=0.13.0",
     # bitsandbytes 0.44+ has experimental Windows CUDA support.
     # Not needed on macOS; skip on Apple Silicon.

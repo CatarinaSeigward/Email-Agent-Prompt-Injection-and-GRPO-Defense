@@ -31,11 +31,18 @@ ADAPTER_OUT = ADAPTERS_DIR / "qwen-injection-dpo"
 
 def main(
     base_model: str = DEFAULT_BASE,
-    epochs: int = 3,
+    # Softened hyperparameters after observing 8 epochs / lr=1e-5 produced
+    # margins=10.5 but generation behaviour unchanged + train_loss=9.4e-5
+    # (severe overfit on training sequences). The fix isn't more aggressive
+    # DPO — it's matching Qwen's native chat template in the prompt format
+    # (see dpo_data._render_prompt). With correct prompt format, milder
+    # training is sufficient and avoids damaging out-of-distribution
+    # generation.
+    epochs: int = 4,
     learning_rate: float = 5e-6,
     per_device_batch_size: int = 1,
     grad_accum: int = 8,
-    beta: float = 0.1,
+    beta: float = 0.2,
     lora_r: int = 16,
 ):
     import torch
@@ -51,10 +58,14 @@ def main(
     ds = Dataset.from_list(pairs)
     print(f"loaded {len(ds)} preference pairs")
 
+    # bf16 throughout — RTX 4060 (Ada Lovelace) supports bf16 natively, and
+    # bf16 has the same dynamic range as fp32, so no GradScaler needed.
+    # Mixing fp16 GradScaler with bf16 LoRA/quant outputs hits:
+    #   "_amp_foreach_non_finite_check_and_unscale_cuda not implemented for BFloat16"
     bnb = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_compute_dtype=torch.bfloat16,
         bnb_4bit_use_double_quant=True,
     )
     tokenizer = AutoTokenizer.from_pretrained(base_model)
@@ -62,7 +73,7 @@ def main(
         tokenizer.pad_token = tokenizer.eos_token
 
     model = AutoModelForCausalLM.from_pretrained(
-        base_model, quantization_config=bnb, device_map="auto", torch_dtype=torch.float16,
+        base_model, quantization_config=bnb, device_map="auto", torch_dtype=torch.bfloat16,
     )
     model = prepare_model_for_kbit_training(model)
 
@@ -73,6 +84,8 @@ def main(
                         "gate_proj", "up_proj", "down_proj"],
     )
 
+    # NOTE: TRL >= 0.12 removed `max_prompt_length` — it now derives prompt
+    # length from `max_length` automatically. Keep only the total budget.
     cfg = DPOConfig(
         output_dir=str(ADAPTER_OUT),
         num_train_epochs=epochs,
@@ -81,19 +94,20 @@ def main(
         learning_rate=learning_rate,
         beta=beta,
         max_length=1024,
-        max_prompt_length=768,
         logging_steps=5,
         save_strategy="epoch",
-        bf16=False, fp16=True,
+        bf16=True, fp16=False,
         gradient_checkpointing=True,
         report_to=[],
     )
 
+    # NOTE: TRL >= 0.13 renamed `tokenizer` to `processing_class` in DPOTrainer
+    # (following the same change in transformers.Trainer >= 4.46).
     trainer = DPOTrainer(
         model=model,
         args=cfg,
         train_dataset=ds,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         peft_config=lora,
     )
     trainer.train()

@@ -8,7 +8,6 @@ venv/
 *.egg-info/
 dist/
 build/
-personaldoc/
 
 # experiment artifacts
 checkpoints/
