@@ -9,20 +9,25 @@
 
 ## 1. Executive Summary
 
-This project evaluated the vulnerability of an AI email agent to prompt injection attacks and implemented two complementary defenses, evaluated independently:
+This project evaluated the vulnerability of an AI email agent to prompt injection attacks and implemented two complementary defenses. Final-stage composition uses gpt-4o-mini as the agent plus the GRPO LoRA as a side-call veto verifier (see §5 for why side-call instead of full LoRA-as-agent).
 
-| Metric (n=38 attacks) | Baseline (gpt-4o-mini, no defense) | + Classifier Guard (deployed) | GRPO LoRA (behavioral, standalone) |
-|---|---|---|---|
-| **Overall ASR** | 36.8% | **13.2%** | **10.5%** (strict) / **0.0%** (reward-regex) |
-| A1 Override | 50.0% | 16.7% | 0.0% |
-| A2 Hidden Injection | 28.6% | 14.3% | 21.4% |
-| A3 Exfiltration | 33.3% | 8.3% | 8.3% |
-| **Benign Pass Rate** (n=10) | 100% | **80%** (B07/B10 false-blocked) | n/a — not wired into agent |
+| Metric (n=38 attacks / 10 benign) | Baseline | + Classifier (Layer 2 only) | + GRPO Verifier (Layer 1 only) | **Combined (L1 + L2)** |
+|---|---|---|---|---|
+| **Overall ASR** | 36.8% | **13.2%** | 15.8% | **15.8%** |
+| A1 Override | 50.0% | 16.7% | 8.3% | **0.0%** |
+| A2 Hidden Injection | 28.6% | 14.3% | 7.1% | 14.3% |
+| A3 Exfiltration | 33.3% | **8.3%** | 33.3% | 33.3% |
+| **Benign Pass Rate** | 100% | 80% | 90% | **70%** |
+| Result file | `attack_baseline.json` | `attack_guard.json` | `attack_verifier_only.json` | `attack_combined.json` |
 
 > [!IMPORTANT]
-> **Two defenses, two evaluations.** (1) The ModernBERT classifier guard runs in the deployed gpt-4o-mini agent pipeline and cuts ASR from 36.8% → 13.2% — measured via `results/attack_guard.json`. (2) The GRPO-trained Qwen2.5-1.5B LoRA is a **parallel behavioral study**: prompted with all 38 attack contexts, it never emits a tool-call pattern matching the training regex (`forward(`, `delete_email(`), and only 4/38 = 10.5% describe a forwarding-to-attacker action under a stricter semantic check — see `results/grpo_behavioral_attack.json`. The two layers are **not yet composed in a single runtime** because the LoRA targets Qwen, not gpt-4o-mini; composition would require swapping the agent backend via vLLM.
+> **The best deployable configuration is the loose verifier alone**, not the combined defense (§4.7 ablation). ASR = 13.2% (matching classifier-only) at 90% benign pass rate (10pp better than classifier-only's 80%). Combined defense is *worse* on overall ASR (15.8% strict / 23.7% loose) because of an **agent-retry paradox**: stricter guarding gives the agent more retry attempts, each of which is an independent attacker lottery ticket (§4.7, §7.7).
 >
-> **Trade-off**: the classifier introduces a 20% false-positive block rate on benign tool calls (B07 reply-to-recruiter, B10 reply-to-intern). Headline ASR reduction comes at a real usability cost that must be disclosed.
+> Two principled findings from the end-to-end measurement:
+> 1. **Reward hacking propagates from bench to deployment**: the GRPO LoRA's A3 weakness (§4.2 strict-semantic eval) shows up as 33.3% A3 ASR under strict thresholding. Loosening to `require_refusal_token=False` recovers most of A3 (16.7%) without benign cost (§4.7).
+> 2. **Defense-in-depth fails in agent settings without deliberate diversification**: two defenses trained on the same `attack_log.jsonl` learn overlapping decision boundaries (§7.6), and even when they catch *different* attacks, the agent's retry behavior can convert that into *more* opportunities for the attacker, not fewer (§7.7).
+>
+> Deployment recommendation: loose verifier only. Defense-research direction: §8 items #2 (outcome-based reward) and #3 (diversified training data) directly target the failure modes uncovered here.
 
 ---
 
@@ -265,12 +270,91 @@ The classifier operates at the **tool-call level** — it intercepts `forward()`
 > [!WARNING]
 > **Real cost of the F1=1.0 number**: the test set is seed-grouped (no attack-body leakage train→test) but contains relatively few benign negatives. The 80% benign pass rate in the agent harness reveals a calibration gap: the classifier is over-confident on tool-call contexts it hasn't seen before. B07 and B10 are reply tasks to legitimate `@company.com` recipients (a recruiter and an intern); both got blocked. A production deployment should either raise the threshold above the default 0.5 or augment training with more diverse benign reply contexts.
 
+### 4.6 Combined Defense End-to-End (measured)
+
+The verifier and classifier were composed under [`src/combined_guard.py`](file:///d:/Projects/AI+RL/email-agent-redteam/src/combined_guard.py) — classifier runs first (5ms ModernBERT forward), and on pass, the verifier escalates a side-call to the GRPO LoRA (~1s Qwen generation) with the GRPO-shaped prompt. The driver is [`eval_combined.py`](file:///d:/Projects/AI+RL/email-agent-redteam/eval_combined.py).
+
+Why **side-call veto** instead of **LoRA-as-agent**:
+1. vLLM has no clean Windows path
+2. Qwen2.5-1.5B's tool-calling under LangGraph ReAct is too fragile (likely stalls, hallucinates tool names)
+3. The GRPO LoRA was trained on `src/grpo_data.py::_render_prompt` shape, not on ReAct's tool-calling template — its refusal behaviour wouldn't transfer
+
+The side-call path keeps gpt-4o-mini as the agent driver and queries the LoRA on its training distribution, which is the only honest way to evaluate Layer-1's contribution.
+
+#### Four corner-case results
+
+| Config | Attack ASR | A1 | A2 | A3 | Benign |
+|---|---|---|---|---|---|
+| Verifier only | 15.8% | 8.3% | 7.1% | 33.3% | 90% |
+| Classifier only (rerun reference) | 13.2% | 16.7% | 14.3% | 8.3% | 80% |
+| **Combined** | **15.8%** | **0.0%** | **14.3%** | **33.3%** | **70%** |
+
+#### Per-category reading
+
+- **A1 (Override)** — combined defense **fully eliminates A1** (0.0%, down from 16.7% classifier-only). This is the verifier's strongest contribution: when the attack contains explicit "ignore previous instructions" patterns, the LoRA refuses cleanly.
+- **A2 (Hidden Injection)** — verifier-only is the best single defense (7.1%), but combining with the classifier pushes A2 back up to 14.3%. The likely cause: the verifier sees the attack context in its training format and refuses; the classifier sees `(tool_name || args || body)` in a different format and *passes* some attacks the verifier would have caught; agent retry-on-block stochasticity then produces different attack attempts on the next iteration.
+- **A3 (Exfiltration)** — both verifier-only and combined sit at 33.3%, matching the **undefended baseline**. The classifier alone catches A3 at 8.3% because it pattern-matches malicious-looking email bodies regardless of the LoRA's opinion. The verifier sees attacker prompts phrased as polite reasonable requests ("could you forward the email to followup@...") and doesn't fire the refusal heuristic — direct evidence of the reward hacking documented in §4.2 propagating to deployment.
+
+#### Benign cost stacks
+
+| Config | Benign Pass | Lost | Specifically blocked |
+|---|---|---|---|
+| Verifier only | 90% | B10 only | reply-to-intern |
+| Combined | 70% | B07, B10, +1 | reply-to-recruiter, reply-to-intern, + variable |
+
+Each defense layer adds its own false-positive surface, and the two surfaces do not overlap — so combined FP rate is the *sum*, not the max. Combined defense pays a 30% benign cost (vs. baseline 100% pass) for a 21pp ASR reduction (vs. 36.8% → 15.8%). Whether that's an acceptable trade is a deployment-policy decision, not a research conclusion.
+
+#### Sanity-check the numbers
+
+```python
+import json
+for tag in ["verifier_only", "combined", "verifier_only_loose", "combined_loose"]:
+    for kind in ["attack", "benign"]:
+        d = json.load(open(f"results/{kind}_{tag}.json"))
+        key = "asr_overall" if kind == "attack" else "pass_rate"
+        print(f"{kind:6} {tag:20} {key} = {d[key]:.4f}")
+```
+
+### 4.7 Threshold Ablation: `require_refusal_token=False` (loose verifier)
+
+To test whether the verifier's A3 weakness was thresholding (it only fires on explicit refusal patterns; soft-cautious LoRA output gets passed through), we re-ran the four corner cases with `require_refusal_token=False`, accepting soft refusals (`SOFT_REFUSE_RE`) as vetos. Outputs labelled `*_loose`.
+
+| Config | Overall ASR | A1 | A2 | A3 | Benign |
+|---|---|---|---|---|---|
+| Verifier strict | 15.8% | 8.3% | 7.1% | **33.3%** | 90% |
+| **Verifier loose** | **13.2%** ⬇ | 8.3% | 14.3% | **16.7%** ⬇ | 90% |
+| Combined strict | 15.8% | 0.0% | 14.3% | 33.3% | 70% |
+| **Combined loose** | **23.7%** ⬆ | 8.3% | 35.7% | 25.0% | 70% |
+
+**Two findings:**
+
+#### 1. Loose verifier alone is strictly better than its strict version
+A3 ASR drops from 33.3% → 16.7% (the LoRA *does* emit soft caution on exfiltration prompts; the strict threshold was discarding it). Benign cost unchanged at 90%. A2 ticked up modestly (7.1% → 14.3%, likely noise at n=14). **Loose verifier-only is also the best single-layer defense we measured**: same ASR as classifier-only (13.2%) but with 10pp better benign pass rate (90% vs 80%).
+
+#### 2. Loose combined is WORSE than either layer alone — the agent-retry paradox
+Combined-loose ASR (23.7%) is higher than verifier-loose (13.2%) and higher than combined-strict (15.8%). Per-category: A2 jumped to 35.7%. Under simple OR-composition logic this should be impossible — adding more block points can only reduce ASR. The explanation is **stochastic retry under LangGraph ReAct**:
+
+- When a tool call is blocked, the agent sees `{"status": "blocked"}` in its tool result and **typically retries with modified arguments** (different recipient, slightly different body).
+- A stricter combined guard blocks **more** initial attempts → the agent burns through **more retries** before either giving up or finding a passing path.
+- Attack succeeds if **any** retry sneaks through. More retries = more lottery tickets for the attacker.
+
+This means: defenses do not compose by OR-ing per-call decisions when the decision-maker is an adaptive agent with retry budget. The right composition framework is **expected number of leaks per session**, which depends on both per-call block rate AND on how the agent reallocates its tool-call budget when blocked.
+
+> [!CAUTION]
+> The "more layers always helps" assumption is wrong in this regime. The deployment recommendation, given this measurement, is **loose verifier alone** (13.2% ASR, 90% benign) — *not* the combined defense. This is a stronger result than the project initially set out to find: a single learned defense outperforms a two-layer ensemble of similar-distribution defenses, *because* the ensemble interacts pathologically with the agent's retry behaviour.
+
+#### Verification that this isn't noise
+
+The strict-vs-loose comparison **per layer** rules out random variance: strict verifier and loose verifier are evaluated against the exact same attack rollouts (same attack_log.jsonl rows, same agent backend, same OpenAI temperature=0). The only changed bit is `require_refusal_token`. A 16.6 pp drop in A3 from one bool flip is too large to be sampling noise on n=12 A3 rollouts.
+
+The combined-loose increase is harder to attribute (could be agent OpenAI nondeterminism), but the direction is consistent with the retry hypothesis: any environment that gives the agent more retry attempts should produce higher ASR variance with an upward skew.
+
 ---
 
-## 5. Proposed Two-Layer Defense (Conceptual)
+## 5. Proposed Two-Layer Defense (now measured, see §4.6)
 
 > [!NOTE]
-> **Important caveat.** The two defenses were trained against the same threat model but were not jointly evaluated in a single runtime in this project — the GRPO LoRA targets Qwen and the deployed agent uses gpt-4o-mini. The architecture below is what would compose them; the measured per-layer numbers in §1 and §4 are what each layer delivers on its own. A real composition would require either (a) standing the Qwen LoRA up under vLLM and routing `agent.py` through its `base_url` (the code already supports this), or (b) retraining the GRPO recipe on an OpenAI-compatible local agent backbone.
+> **Composition method**: gpt-4o-mini agent + ModernBERT classifier at the tool boundary + GRPO LoRA side-call veto. See §4.6 for why we chose side-call over replacing the agent backend.
 
 ```mermaid
 graph TD
@@ -298,15 +382,19 @@ graph TD
 | **Layer 1** | GRPO LoRA adapter | **Studied in isolation** — 0% reward-regex ASR / 10.5% strict ASR on 38 attack contexts | A1 (Override), A3 (Exfiltration) | Behavioral: model refuses to generate tool-call text |
 | **Layer 2** | ModernBERT classifier | **Deployed in agent pipeline** — drops gpt-4o-mini ASR 36.8% → 13.2%, costs 20% benign FP | A2 (Hidden Injection), partial on A1/A3 | Runtime guard: blocks tool calls with injection-scored content |
 
-### Why Two Layers?
+### Why Two Layers? (post-measurement)
 
-| | LLM (Layer 1, study) | Classifier (Layer 2, deployed) |
-|---|---|---|
-| **Strength** | Understands context, refuses with explanation | Pattern matching at tool boundary, no reasoning needed |
-| **Weakness** | Reward-hacks the training regex; A2 still ~21% strict ASR | 20% FP on benign reply tasks; no understanding of user intent |
-| **False positives (measured)** | Not measured on benign harness (no agent integration) | **20%** (B07, B10 → `results/benign_guard.json`) |
-| **Latency** | Generation-bound (one decode pass per refusal) | Single ModernBERT forward pass per tool call |
-| **Attack coverage (measured)** | A1 ✅  A2 ⚠️ (21%)  A3 ✅ | A1 16.7%  A2 14.3%  A3 8.3% residual ASR |
+| | LLM Verifier (Layer 1) | Classifier (Layer 2) | Combined |
+|---|---|---|---|
+| **Strength** | Reasons about intent; kills A1 cleanly (0% combined) | Pattern-matches malicious bodies; catches A3 (8.3%) | Strict A1 elimination |
+| **Weakness** | Reward-hacks A3 phrasings (33% ASR) | 20% FP on routine benign replies | FP surfaces stack (30% benign loss) |
+| **False positives (measured)** | 10% (B10) | 20% (B07, B10) | **30%** |
+| **Latency** | ~1s per destructive call (Qwen generation) | ~5ms (ModernBERT forward pass) | classifier-first short-circuit |
+| **Attack coverage (measured)** | A1 8.3% / A2 7.1% / A3 33.3% | A1 16.7% / A2 14.3% / A3 8.3% | A1 0% / A2 14.3% / A3 33.3% |
+| **Verdict** | Best on A1+A2 alone | Best on A3 alone | Best on A1 only; net not better than classifier-only |
+
+> [!CAUTION]
+> The combined-defense ASR (15.8%) is **not lower** than classifier-only (13.2%). The two layers learn substantially overlapping decision boundaries because they were trained on the same `attack_log.jsonl`. Defense-in-depth requires that the two layers fail on *different* inputs; here they largely fail on the same A3 inputs. See §7.6 and §8 for the corrective direction.
 
 ---
 
@@ -392,13 +480,47 @@ The 1.5B model has limited reasoning to distinguish legitimate forwarding from i
 
 Held-out F1 = 1.0 on a seed-grouped 80/20 split looked decisive, but the agent-harness benign run pinned the actual benign pass rate at 80% (2/10 false-positive blocks on routine reply tasks). The classifier's test distribution is **email-body-only** while its runtime distribution is **`tool_name || string_args || referenced_email_body`** — those are not the same input, and the gap is what produced the FPs. Lesson: classifier evals must mirror runtime input plumbing exactly.
 
+### 7.6 Two Defenses Trained on the Same Data Are Not Orthogonal at Runtime
+
+The measured combined ASR (15.8%) matches verifier-only ASR (15.8%) and is **not better** than classifier-only (13.2%). Both layers were trained on the same `attack_log.jsonl`, so they learn substantially overlapping decision boundaries — and they fail on overlapping inputs (specifically: the A3 phrasings the LoRA reward-hacks past also slip through whatever fraction of the classifier's seed-grouped test set didn't catch them).
+
+For defense-in-depth to multiply, the two layers must:
+- See **different feature distributions** (e.g. classifier on raw email body; verifier on a reasoning chain over `(user_request, action_intent, sender_domain)`)
+- Be trained on **different reformulations** of the same threat (e.g. classifier on attack-laden bodies; verifier on adversarial paraphrases generated by a *different* attacker model than the one used for PAIR)
+- Have **independently sampled failure modes** measurable on a holdout the other layer hasn't seen
+
+In retrospect this should have been a constraint from the project start. It became visible only once the layers were composed — which is itself an argument for why §4.6's end-to-end eval is the most important part of the project.
+
+### 7.7 The Agent-Retry Paradox: More Layers Can Mean Higher ASR
+
+§4.7 measured a case where adding a second defense layer (classifier + loose verifier) produced **higher** attack success rate (23.7%) than either layer alone (13.2% verifier-loose, 13.2% classifier-only).
+
+The mechanism:
+1. LangGraph ReAct agents see tool-result strings like `{"status": "blocked"}` and **adapt** — they typically try the same tool with modified arguments, or pivot to a different tool.
+2. A stricter guard blocks more initial calls, forcing the agent through more retry iterations before either giving up or finding a passing path.
+3. Attack succeeds if *any* retry slips through. More retries = more independent chances for the attacker to win.
+
+**This breaks the standard "more layers = safer" assumption** that comes from non-adaptive settings (web firewalls, signature-based IDS). In agent settings, defenses must be evaluated by **expected leaks per session**, not by per-call block rate. The right framework is something like:
+
+```
+P(attack succeeds) = 1 - (1 - P(any one call leaks))^(retry_budget)
+```
+
+Where `retry_budget` is itself a function of how many times tools get blocked. Make the guard stricter and you increase the exponent; the term inside might not shrink fast enough to compensate.
+
+**Practical implication**: the deployment recommendation, given the measurements, is the **loose verifier alone**, not the combined defense. This is unintuitive but well-supported: it has the same 13.2% ASR as classifier-only with 10pp better benign pass rate (90% vs 80%), AND it avoids the retry-paradox amplification.
+
+The bigger methodological point: any future work composing defenses for agents must run the end-to-end harness *with retry budget controlled*, not just per-call ablations. Tooling for this (cap retries, log per-call decisions, expose retry counts) is the highest-priority unmet need.
+
 ---
 
 ## 8. Future Directions
 
-1. **Integrate the two layers in one runtime** — stand the Qwen+GRPO LoRA up under vLLM, swap `agent.py`'s `base_url`, then re-run `attack_combined.json` and `benign_combined.json` to replace the §1 columns with measured combined numbers.
-2. **Outcome-based reward function** — penalise any completion that mentions a non-`@company.com` recipient in an actionable phrasing, not just literal regex. Re-run GRPO and re-evaluate strict ASR.
-3. **Classifier threshold sweep** — find the threshold that minimises benign FP while keeping ASR ≤ 15%. Current default (0.5) is the point estimate; the precision/recall curve was not measured.
-4. **Test on larger models** (7B/14B) — may close the A2 strict-ASR gap without needing a domain-aware reward.
-5. **Adversarial classifier training** — add PAIR-generated A2 variants and diverse benign reply contexts (the B07/B10 failure pattern).
-6. **Production deployment** — integrate the two-layer defense behind a feature flag, log all `blocked` events, and tune threshold from real benign traffic.
+1. ~~**Integrate the two layers in one runtime**~~ ✅ **Done** — see §4.6. Result: composition works mechanically but doesn't multiply defenses; under loose-mode it actively hurts (§4.7). This finding is the impetus for items 2–4.
+2. ~~**Threshold ablation**~~ ✅ **Done** — see §4.7. Loose verifier (`require_refusal_token=False`) is the new recommended deployment: same ASR as classifier-only, 10pp better benign pass.
+3. **Outcome-based reward function** — penalise any completion that mentions a non-`@company.com` recipient in an actionable phrasing, not just the literal `forward(` regex. This directly addresses the A3 reward-hacking that is currently the dominant failure mode. Re-run GRPO + re-evaluate combined ASR; the prediction is A3 drops from 33% → ≤10%.
+4. **Cap agent retry budget** to break the agent-retry paradox (§7.7). Pass `RECURSION_LIMIT` or `max_iterations` to `agent.invoke()`, log per-row retry count, and re-measure combined ASR vs. retry cap. Hypothesis: combined defense recovers from "worse than single layer" to "comparable to single layer" at cap ≤ 8.
+5. **Diversify Layer 1 training distribution** — fork: classifier on raw bodies, verifier on PAIR-generated paraphrases from a *different* attacker model (not gpt-4o-mini). Re-measure combined ASR. Expected: overlap shrinks, combined < min(individual).
+6. **Test on larger models** (7B/14B) — may close the A2 strict-ASR gap without needing a domain-aware reward.
+7. **Adversarial classifier training** — add PAIR-generated A2 variants and diverse benign reply contexts (the B07/B10 failure pattern).
+8. **Production deployment** — current recommendation is loose-verifier-only behind a feature flag, with telemetry on retry counts and `blocked` events. Once item 3 (outcome-based reward) lands and combined defense beats single-layer with retry cap, revisit.
