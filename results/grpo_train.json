@@ -1,0 +1,14 @@
+{
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "init_adapter": "D:\\Projects\\AI+RL\\email-agent-redteam\\adapters\\qwen-injection-sft",
+  "n_prompts": 114,
+  "epochs": 3,
+  "num_generations": 4,
+  "learning_rate": 2e-06,
+  "beta": 0.005,
+  "final_loss": null,
+  "final_reward": 1.5703125,
+  "final_reward_std": 0.20473942905664444,
+  "final_kl": 1.9778182096779346,
+  "adapter_path": "D:\\Projects\\AI+RL\\email-agent-redteam\\adapters\\qwen-injection-grpo"
+}

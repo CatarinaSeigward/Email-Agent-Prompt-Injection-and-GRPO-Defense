@@ -1,0 +1,11 @@
+{
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "n_samples": 1140,
+  "n_prompts": 114,
+  "n_templates": 10,
+  "epochs": 2,
+  "learning_rate": 2e-05,
+  "final_loss": 1.1796,
+  "final_grad_norm": 1.173768162727356,
+  "adapter_path": "D:\\Projects\\AI+RL\\email-agent-redteam\\adapters\\qwen-injection-sft"
+}

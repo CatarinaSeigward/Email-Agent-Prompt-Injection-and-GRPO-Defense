@@ -20,6 +20,8 @@ The deployment recommendation, given the measurements, is **loose verifier alone
 
 ## 1. Executive Summary
 
+![Threat model and two-layer defense](docs/diagrams/attack_concept.png)
+
 This project evaluated the vulnerability of an AI email agent to prompt injection attacks and implemented two complementary defenses. Final-stage composition uses gpt-4o-mini as the agent plus the GRPO LoRA as a side-call veto verifier (see §5 for why side-call instead of full LoRA-as-agent).
 
 | Metric (n=38 attacks / 10 benign) | Baseline | + Classifier (Layer 2 only) | + GRPO Verifier (Layer 1 only) | **Combined (L1 + L2)** |
@@ -44,7 +46,7 @@ This project evaluated the vulnerability of an AI email agent to prompt injectio
 
 ## 1.5 Positioning Against Related Work
 
-The project's findings sit at the intersection of four established research lines, listed here with the specific contributions this report makes relative to each. A full reading list is in [`相关研究.md`](file:///d:/Projects/AI+RL/email-agent-redteam/%E7%9B%B8%E5%85%B3%E7%A0%94%E7%A9%B6.md); we cite inline where the connection is load-bearing.
+The project's findings sit at the intersection of four established research lines, listed here with the specific contributions this report makes relative to each. We cite inline where the connection is load-bearing.
 
 | Research line | Anchor citations | What this project adds |
 |---|---|---|
@@ -89,6 +91,10 @@ The undefended GPT-4o-mini agent had an **overall ASR of 36.8%**:
 ## 3. Training Pipeline
 
 ### 3.1 Architecture
+
+![Project pipeline](docs/diagrams/pipeline.png)
+
+A more detailed dataflow specifically for the Layer-1 training is:
 
 ```mermaid
 graph LR
@@ -695,8 +701,8 @@ These need to be addressed before any external claims can be made.
 | **T7** | **Reward function is the regex it gets hacked against**. The §4.2 strict-vs-regex gap is real but trivially predicted by the form of the regex; a domain-grounded oracle would make this a stronger claim. | Implement the §8 #3 outcome-based reward and re-measure the gap; predict it shrinks. |
 | **T8** | **OpenAI temperature uncontrolled in attack/benign harness**. `src/agent.py::build_agent` sets `temperature=0` but does not pass a seed; for gpt-4o-mini at temp=0 outputs are still nondeterministic on the OpenAI side (batched sampling). Two consecutive `attack_combined.json` runs differ by 1–3 pp. | Set `temperature=0` + `seed=42` (currently silently ignored by some chat models, but the field is reserved). Pin OpenAI model version (`gpt-4o-mini-2024-07-18`) so backend rolls don't shift means. Run k=3 replicates per config and report SD. |
 | **T9** | **No SFT-only behavioural eval on the 38-attack distribution**. We have `eval_grpo_attack.py` for the GRPO LoRA but never ran the same harness on the SFT-only adapter (`adapters/qwen-injection-sft/`). The "GRPO is better than SFT" claim in §4.4 is supported only by reward trajectories, not by held-out attack ASR. | Run `eval_grpo_attack.py` with `TEST_ADAPTER=adapters/qwen-injection-sft`; tabulate strict ASR side-by-side with the GRPO column. Cheap: <10 minutes wall clock. |
-| **T10** | **Cost and wall-clock not quantified**. The project's resource-efficiency claim ("4060 8GB, ~2h end-to-end, ~\$1.20") is in `RUNBOOK.md` but not in the report itself; reviewers can't assess the "small-budget" framing. | Add a §10 "Reproduction cost" with PAIR API spend (≈\$0.40), eval API spend (≈\$0.80), SFT wall (12 min on 4060), GRPO wall (31 min), classifier wall (5 min). Trace these to actual API receipts where possible. |
-| **T11** | **Random seeds and replication completeness**. Some seeds are hard-coded (`random.Random(17)` in classifier dataset, `random.Random(42)` in `grpo_data.py` final shuffle), others are not pinned (PAIR, GRPO rollouts, OpenAI sampling). The "deterministic re-run" claim in `RUNBOOK.md` is partial. | Audit every `random.*` and `torch.manual_seed` call in `src/`; document which are pinned, which aren't, and the variance budget of the un-pinned ones. Add a `repro-seeds.md` so a third party can match our numbers ± a stated tolerance. |
+| **T10** | **Cost and wall-clock not quantified** in this report. The project's resource-efficiency claim ("4060 8GB, ~2h end-to-end, ~\$1.20") relies on internal runbook notes; reviewers can't assess the "small-budget" framing from this document alone. | Add a §10 "Reproduction cost" with PAIR API spend (≈\$0.40), eval API spend (≈\$0.80), SFT wall (12 min on 4060), GRPO wall (31 min), classifier wall (5 min). Trace these to actual API receipts where possible. |
+| **T11** | **Random seeds and replication completeness**. Some seeds are hard-coded (`random.Random(17)` in classifier dataset, `random.Random(42)` in `grpo_data.py` final shuffle), others are not pinned (PAIR, GRPO rollouts, OpenAI sampling). Deterministic re-run is therefore only partial. | Audit every `random.*` and `torch.manual_seed` call in `src/`; document which are pinned, which aren't, and the variance budget of the un-pinned ones. Add a `repro-seeds.md` so a third party can match our numbers ± a stated tolerance. |
 | **T12** | **No `SYSTEM_PROMPT_HARDENED` baseline measured**. `src/agent.py` defines a hardened system prompt explicitly listing trust boundaries; we never ran the attack/benign harness with it. So we cannot disentangle "training-based defense" from "ask the model nicely". | Run `run_attack_replay(..., system_prompt=SYSTEM_PROMPT_HARDENED)` + benign equivalent. Compare ASR to baseline 36.8% and to classifier 13.2%. If hardened-prompt alone achieves ASR ≤ 18%, the marginal value of every trained component is meaningfully smaller than the report implies. |
 | **T13** | **`MAX_PAIR_ROUNDS=2` is below literature norm**. PAIR (Chao et al. 2023) uses up to 20 queries per seed; TAP uses tree search of depth 10. Our attacker budget is unusually small, which means the 38 attack_log rollouts are weak attacks — defended ASR on a stronger attacker would be higher. | Re-run PAIR with `MAX_PAIR_ROUNDS=5–10` and 60+ seeds (Tier A1). The expected effect: baseline ASR rises (more attacker iterations find more wins), defended ASR also rises but by less, *and* combined-loose's retry paradox should sharpen because each attack-log row arrives with more "found exploits" the agent can replay. |
 
@@ -769,7 +775,7 @@ Reasonable target venues (4–6 page workshop, NeurIPS SoLaR / ICLR Trustworthy 
 | Reward ensembles only partial fix | Eisenstein et al. 2023 | Frame §7.6 |
 | Agent guard architectures | TrustAgent 2024; Bagdasaryan et al. 2024 | Position the verifier |
 
-A full reading list with annotations is in `相关研究.md`.
+An annotated reading list is maintained separately.
 
 ### 9.6 Honest assessment of probability of success
 

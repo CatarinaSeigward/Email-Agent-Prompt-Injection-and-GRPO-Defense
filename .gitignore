@@ -16,10 +16,15 @@ adapters/
 *.lora
 wandb/
 
-# generated logs (regenerate via redteam.py)
-data/attack_log.jsonl
-results/*.json
-results/*.png
+# NOTE: data/attack_log.jsonl + results/*.json + results/*.png are
+# now tracked in git so the Streamlit demo and final_report.md remain
+# reproducible from a fresh clone without re-running the pipeline.
+# Total size < 2 MB. If you regenerate via redteam.py / train scripts,
+# overwrites are expected and intentional.
+
+# logs (always ignored)
+*.log
+out_*.log
 
 # editor
 .vscode/

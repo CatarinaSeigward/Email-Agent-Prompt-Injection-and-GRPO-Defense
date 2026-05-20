@@ -12,10 +12,8 @@ dependencies = [
     "langchain-openai>=0.2.0",
     "langchain-core>=0.3.0",
     "openai>=1.50.0",
-
     # ── Eval ─────────────────────────────────────────────────────────────────
     "inspect-ai>=0.3.50",
-
     # ── ML / Training ────────────────────────────────────────────────────────
     # Pin <5.0: transformers 5.x changed _is_package_available() to return
     # a (bool, version) tuple instead of a bool. trl 0.19 (and earlier)
@@ -38,13 +36,15 @@ dependencies = [
     # The [tool.uv.sources] block below overrides the index to the CUDA wheel
     # on Windows/Linux, giving you a CUDA-enabled build automatically.
     "torch>=2.4.0",
-
     # ── Utilities ────────────────────────────────────────────────────────────
     "matplotlib>=3.9.0",
     "scikit-learn>=1.5.0",
     "pydantic>=2.9.0",
     "python-dotenv>=1.0.0",
     "tqdm>=4.66.0",
+    "streamlit>=1.57.0",
+    "plotly>=6.7.0",
+    "pandas>=3.0.2",
 ]
 
 # ── Dev dependencies (new uv format, replaces deprecated [tool.uv] section) ──

@@ -1,0 +1,10 @@
+{
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "n_pairs": 270,
+  "epochs": 4,
+  "final_loss": 0.0028223248198628427,
+  "rewards/chosen": 2.077267071604729,
+  "rewards/rejected": -4.098254317045212,
+  "rewards/margins": 6.175521409511566,
+  "adapter_path": "D:\\Projects\\AI+RL\\email-agent-redteam\\adapters\\qwen-injection-dpo"
+}

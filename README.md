@@ -2,7 +2,9 @@
 
 > End-to-end study of indirect prompt injection on a tool-using LLM email agent — including three negative results worth publishing.
 
-[![audit: 51/51](https://img.shields.io/badge/audit-51%2F51-brightgreen)](scripts/audit_report_numbers.py) [![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](#license)
+[![audit: 51/51](https://img.shields.io/badge/audit-51%2F51-brightgreen)](scripts/audit_report_numbers.py) [![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](#license) [![demo: streamlit](https://img.shields.io/badge/demo-streamlit-FF4B4B?logo=streamlit&logoColor=white)](demo/)
+
+> 🎭 **Interactive demo**: `uv run streamlit run demo/app.py` — 4 tabs covering all findings, no GPU/API needed. See [demo/README.md](demo/README.md) for deploy-to-cloud instructions.
 
 ---
 
@@ -39,26 +41,15 @@ All ASR numbers computed on the same 38-rollout `data/attack_log.jsonl` (12 A1 +
 
 **Deployment recommendation, given these measurements:** **loose verifier alone** — matches classifier-only ASR with 10pp better benign pass rate, and avoids the retry-paradox amplification. See [§4.6, §4.7](final_report.md#46-combined-defense-end-to-end-measured) for the full corner-case analysis.
 
-## Architecture
+## Threat model
 
-```mermaid
-graph LR
-    SEEDS[attack_seeds.jsonl<br/>30 hand-written seeds] --> PAIR[PAIR campaign<br/>src/redteam.py]
-    PAIR --> LOG[attack_log.jsonl<br/>38 rollouts]
-    LOG --> SFT[SFT warmup<br/>10 refusal templates x 114 prompts]
-    SFT --> SFTADAPTER[adapters/qwen-injection-sft]
-    SFTADAPTER --> GRPO[GRPO RL<br/>rule-based reward, G=4]
-    LOG --> GD[grpo_data.py<br/>x3 inbox variants]
-    GD --> PROMPTS[grpo_prompts.jsonl<br/>114 prompts]
-    PROMPTS --> GRPO
-    GRPO --> GRPOADAPTER[adapters/qwen-injection-grpo]
-    LOG --> CLS[ModernBERT classifier<br/>src/classifier.py]
-    CLS --> CLSADAPTER[adapters/injection-classifier]
+![Threat model and two-layer defense](docs/diagrams/attack_concept.png)
 
-    GRPOADAPTER --> EVAL[eval_combined.py<br/>side-call veto verifier]
-    CLSADAPTER --> EVAL
-    EVAL --> RESULTS[results/attack_combined.json<br/>+ 3 sister files]
-```
+The user is legitimate; the attacker is anyone who can place an email in the user's inbox. The attacker hides instructions in the email body. The agent reads the inbox, mistakes that data for instructions, and tries to call a destructive tool. Two layers gate every destructive tool call (`forward`, `send_reply`, `delete_email`). If both layers allow, the tool executes — and the data leaves the company.
+
+## Pipeline
+
+![End-to-end pipeline](docs/diagrams/pipeline.png)
 
 ## Stack
 
@@ -90,15 +81,13 @@ graph LR
 uv sync
 cp .env.example .env  # fill OPENAI_API_KEY
 
-# 2. Run the eval pipeline (assumes adapters already trained — see RUNBOOK.md for training)
+# 2. Run the eval pipeline (assumes adapters already trained — see final_report.md §3 for training)
 $env:PYTHONIOENCODING="utf-8"
 uv run python eval_combined.py        # 4 corner cases, ~45 min
 uv run python scripts/audit_report_numbers.py  # expect 51/51 OK
 ```
 
-For full end-to-end including training, see **[RUNBOOK.md](RUNBOOK.md)**.
-
-For Chinese-language tutorials, see **[小白入门_运行指南.md](小白入门_运行指南.md)** (how to run) and **[小白入门_基础知识.md](小白入门_基础知识.md)** (the foundational concepts).
+For the rigorous end-to-end report (~770 lines, 13 sections, threats to validity, lessons learned), see **[final_report.md](final_report.md)**.
 
 ## Where to find each result
 
@@ -119,11 +108,7 @@ For Chinese-language tutorials, see **[小白入门_运行指南.md](小白入�
 email-agent-redteam/
 ├── README.md                       # this file
 ├── final_report.md                 # rigorous experimental writeup (~770 lines)
-├── 小白入门_运行指南.md             # Chinese beginner runbook (how to run)
-├── 小白入门_基础知识.md             # Chinese knowledge primer (foundations)
-├── interview_prep.md               # English interview prep (20 Q&A)
-├── RUNBOOK.md                      # English step-by-step execution
-├── 相关研究.md                      # Chinese annotated paper list
+├── demo/                           # Streamlit dashboard (4 tabs)
 ├── src/
 │   ├── agent.py                    # LangGraph ReAct agent + 5 tools + Guard interface
 │   ├── redteam.py                  # PAIR campaign driver
@@ -176,7 +161,7 @@ The findings here build on or contrast with:
 - **Rafailov et al.** *Direct Preference Optimization: Your Language Model is Secretly a Reward Model.* 2023. [arXiv:2305.18290](https://arxiv.org/abs/2305.18290) — the method that failed in §3.2.5.
 - **Debenedetti et al.** *AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents.* NeurIPS 2024. [arXiv:2406.13352](https://arxiv.org/abs/2406.13352) — the benchmark this work should ideally be ported to (§9.3-C1).
 
-For the full annotated list, see [相关研究.md](相关研究.md).
+For the project-internal annotated reading list, contact the author.
 
 ## License
 
