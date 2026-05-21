@@ -3,6 +3,8 @@
 Simplified, executive-summary version of the project. Two tabs, no model
 inference, no API calls. Full report on GitHub.
 
+**Live URL**: <https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/>
+
 ## Run locally
 
 ```powershell

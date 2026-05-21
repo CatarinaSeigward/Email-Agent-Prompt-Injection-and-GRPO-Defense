@@ -2,9 +2,9 @@
 
 > End-to-end study of indirect prompt injection on a tool-using LLM email agent — including three negative results worth publishing.
 
-[![audit: 51/51](https://img.shields.io/badge/audit-51%2F51-brightgreen)](scripts/audit_report_numbers.py) [![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](#license) [![demo: streamlit](https://img.shields.io/badge/demo-streamlit-FF4B4B?logo=streamlit&logoColor=white)](demo/)
+[![audit: 51/51](https://img.shields.io/badge/audit-51%2F51-brightgreen)](scripts/audit_report_numbers.py) [![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](#license) [![demo: live](https://img.shields.io/badge/demo-live-FF4B4B?logo=streamlit&logoColor=white)](https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/)
 
-> 🎭 **Interactive demo**: `uv run streamlit run demo/app.py` — 4 tabs covering all findings, no GPU/API needed. See [demo/README.md](demo/README.md) for deploy-to-cloud instructions.
+> **Interactive demo (live)**: https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/ — 2 tabs covering all findings, no GPU/API needed. Or run locally: `uv run streamlit run demo/app.py`.
 
 ---
 

@@ -5,6 +5,7 @@
 > **Hardware**: NVIDIA RTX 4060 Laptop GPU (8 GB) on Windows 11
 > **Base models**: Qwen2.5-1.5B-Instruct (QLoRA 4-bit NF4) + ModernBERT-base (152M, full fine-tune) + gpt-4o-mini (agent backbone)
 > **License**: MIT (code) · CC BY 4.0 (this report)
+> **Live interactive demo**: <https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/>
 
 ---
 
