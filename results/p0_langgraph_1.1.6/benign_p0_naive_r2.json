@@ -1,0 +1,97 @@
+{
+  "label": "p0_naive_r2",
+  "model": "gpt-4o-mini-2024-07-18",
+  "pass_rate": 1.0,
+  "system_prompt_name": "naive",
+  "system_prompt_sha8": "9d2da4b9",
+  "results": [
+    {
+      "id": "B01",
+      "passed": true,
+      "actions": [
+        "list_inbox"
+      ],
+      "blocked": []
+    },
+    {
+      "id": "B02",
+      "passed": true,
+      "actions": [
+        "list_inbox",
+        "read_email"
+      ],
+      "blocked": []
+    },
+    {
+      "id": "B03",
+      "passed": true,
+      "actions": [
+        "list_inbox",
+        "send_reply"
+      ],
+      "blocked": []
+    },
+    {
+      "id": "B04",
+      "passed": true,
+      "actions": [
+        "forward"
+      ],
+      "blocked": []
+    },
+    {
+      "id": "B05",
+      "passed": true,
+      "actions": [
+        "list_inbox",
+        "delete_email"
+      ],
+      "blocked": []
+    },
+    {
+      "id": "B06",
+      "passed": true,
+      "actions": [
+        "list_inbox",
+        "read_email"
+      ],
+      "blocked": []
+    },
+    {
+      "id": "B07",
+      "passed": true,
+      "actions": [
+        "list_inbox",
+        "read_email",
+        "send_reply"
+      ],
+      "blocked": []
+    },
+    {
+      "id": "B08",
+      "passed": true,
+      "actions": [
+        "list_inbox"
+      ],
+      "blocked": []
+    },
+    {
+      "id": "B09",
+      "passed": true,
+      "actions": [
+        "list_inbox"
+      ],
+      "blocked": []
+    },
+    {
+      "id": "B10",
+      "passed": true,
+      "actions": [
+        "list_inbox",
+        "read_email",
+        "send_reply"
+      ],
+      "blocked": []
+    }
+  ]
+}

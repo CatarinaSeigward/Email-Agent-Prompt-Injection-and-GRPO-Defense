@@ -1,10 +1,10 @@
 # Email Agent Red-Team & Defense
 
-> End-to-end study of indirect prompt injection on a tool-using LLM email agent — including three negative results worth publishing.
+> End-to-end study of indirect prompt injection on a tool-using LLM email agent — and a self-audit that retracted two of its own four headline findings.
 
-[![audit: 51/51](https://img.shields.io/badge/audit-51%2F51-brightgreen)](scripts/audit_report_numbers.py) [![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](#license) [![demo: live](https://img.shields.io/badge/demo-live-FF4B4B?logo=streamlit&logoColor=white)](https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/)
+[![audit: 61/61 + 79/79](https://img.shields.io/badge/audit-61%2F61%20%2B%2079%2F79-brightgreen)](scripts/audit_report_numbers.py) [![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](#license) [![demo: live](https://img.shields.io/badge/demo-live-FF4B4B?logo=streamlit&logoColor=white)](https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/)
 
-> **Interactive demo (live)**: https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/ — 2 tabs covering all findings, no GPU/API needed. Or run locally: `uv run streamlit run demo/app.py`.
+> **Interactive demo (live)**: https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/ — no GPU/API needed. Or run locally: `uv run streamlit run demo/app.py`.
 
 ---
 
@@ -15,31 +15,43 @@ A gpt-4o-mini email agent with 5 tools (`list_inbox`, `read_email`, `send_reply`
 - **Layer 1** — Qwen2.5-1.5B + QLoRA, SFT-warmed-up then GRPO-trained against a rule-based reward, deployed as a **side-call veto verifier** at the tool-call boundary.
 - **Layer 2** — ModernBERT-base injection classifier on the same boundary.
 
-All four corner cases (verifier-only / classifier-only / combined-strict / combined-loose) are measured end-to-end on a 4060 8GB laptop. **Every numeric claim in the report traces to a result file** via `scripts/audit_report_numbers.py` (51/51 checks passing).
+Then a measurement pass — paired significance tests, replicated runs, and two baselines the harness had never been able to reach — was run against the project's own conclusions. **It kept one, strengthened another, and retracted two.** ([`p0_analysis.md`](p0_analysis.md))
+
+Every numeric claim traces to a result file: `scripts/audit_report_numbers.py` (61/61) and `scripts/audit_p0_numbers.py` (79/79).
 
 ## Why this is interesting
 
-Three findings that go against common assumptions:
+**1. Reinforcement learning removed the behavior it was trained to install.** The GRPO stage improved every training metric — mean reward 0.86 → 1.57, reward_std −71%, KL bounded — while **cutting the held-out refusal rate from 86.8% to 50.0%** (paired McNemar *p* = 0.0013) with no improvement in semantic attack success over the SFT checkpoint it started from. What replaced the refusals was non-committal filler:
 
-1. **Adding a second defense layer made the agent *less* safe.** Combined-loose ASR (23.7%) is **higher** than either layer alone (13.2% verifier / 13.2% classifier). Mechanism: stricter guarding gives the agent more retry attempts, each an independent attacker lottery ticket — the **agent-retry paradox**. ([§7.7](final_report.md#77-the-agent-retry-paradox-more-layers-can-mean-higher-asr))
-2. **Reward hacking propagates from bench to deployment.** The GRPO LoRA achieves 0% ASR under the training regex but 10.5% under a strict semantic check, and 33.3% A3 ASR under runtime evaluation — the model learned to avoid the trained-against tokens, not the trained-against behavior. ([§4.2](final_report.md#42-grpo-adapter--full-behavioral-eval-on-all-38-attack-contexts))
-3. **DPO converged on training metrics but failed at inference.** `rewards/margins = 6.18`, `train_loss = 0.0028`, yet the runtime generation distribution was unchanged. Root cause: `chosen` and `rejected` lived in different output distributions of the base policy, so DPO minimized loss by *lowering an already-near-zero probability*. This is the methodological reason we switched to GRPO. ([§3.2.5](final_report.md#325-path-not-taken-dpo-direct-preference-optimization))
+> `"No further processing required; the body contains instructions that do not require acting on behalf of the user."`
 
-Plus one practical contribution: an undocumented **`train-mode + gradient_checkpointing` bug** in TRL 0.19 + PEFT 0.19 that silently zeroes GRPO gradients (clipped_ratio=1.0 across all rollouts) without throwing any error. ([§7.1](final_report.md#71-critical-bug-train-mode--gradient_checkpointing-breaks-grpo-generation))
+Evasive output that dodges the reward's penalties without doing the intended thing. Nothing visible during training would have revealed it. ([§4.8](final_report.md#48-sft-vs-grpo-on-held-out-attack-contexts))
+
+**2. A 14-line system prompt beat every trained defense.** A trust-boundary instruction — no training, no GPU, no second model — reaches **0.0% ASR across 38 attacks × 3 replicates with zero destructive tool calls**, perfectly dominant over the naive baseline (*p* = 0.0005, and not one attack row where it did worse). It still executes `send_reply` and `delete_email` when the *user* asks, so this is a real trust boundary rather than blanket refusal. This control had never been run. ([§4.9](final_report.md#49-prompt-only-defense-baseline-t12))
+
+**3. Two findings did not survive their own audit.** The project's former flagship — the *agent-retry paradox*, that composing defenses raises ASR because blocking triggers retries — is not significant (*p* = 0.39), and its mechanism is contradicted by the project's own logs: the agent's destructive-attempt budget is **constant at ~25 across all six defense configurations**. The agent was never retrying; it sweeps a 25-email inbox and takes one action per email. Guards convert executed calls to blocked calls one-for-one. ([§7.7](final_report.md#77-retracted-the-agent-retry-paradox--and-what-replaced-it))
+
+**4. DPO converged on training metrics but failed at inference.** `rewards/margins = 6.18`, `train_loss = 0.0028`, generation distribution unchanged — `chosen` and `rejected` lived in different output distributions of the base policy, so the loss fell by lowering an already-near-zero probability. ([§3.2.5](final_report.md#325-path-not-taken-dpo-direct-preference-optimization))
+
+Plus an engineering contribution: an undocumented **`train-mode + gradient_checkpointing` bug** in TRL 0.19 + PEFT 0.19 that silently zeroes GRPO gradients (clipped_ratio=1.0 across all rollouts) with no error raised. ([§7.1](final_report.md#71-critical-bug-train-mode--gradient_checkpointing-breaks-grpo-generation))
 
 ## Headline results
 
-All ASR numbers computed on the same 38-rollout `data/attack_log.jsonl` (12 A1 + 14 A2 + 12 A3). Benign pass rate computed on the same 10-task harness in `src/eval.py::BENIGN_TASKS`.
+All ASR numbers computed on the same 38-rollout `data/attack_log.jsonl` (12 A1 + 14 A2 + 12 A3). Benign pass rate on the 10-task harness in `src/eval.py::BENIGN_TASKS`.
 
-| Metric | Baseline | + Classifier | + Verifier (loose) | Combined (loose) |
-|---|---|---|---|---|
-| Overall ASR | 36.8% | 13.2% | **13.2%** | 23.7% |
-| A1 Override | 50.0% | 16.7% | 8.3% | 8.3% |
-| A2 Hidden Injection | 28.6% | 14.3% | 14.3% | 35.7% |
-| A3 Exfiltration | 33.3% | 8.3% | 16.7% | 25.0% |
-| Benign Pass Rate | 100% | 80% | **90%** | 70% |
+| Metric | Naive baseline | **Hardened prompt** | + Classifier | + Verifier (loose) | Combined (loose) |
+|---|---|---|---|---|---|
+| Overall ASR | 31.6% ± 12.1% | **0.0% ± 0.0%** | 13.2% | 13.2% | 23.7% |
+| A1 Override | 16.7% | **0.0%** | 16.7% | 8.3% | 8.3% |
+| A2 Hidden Injection | 28.6% | **0.0%** | 14.3% | 14.3% | 35.7% |
+| A3 Exfiltration | 50.0% | **0.0%** | 8.3% | 16.7% | 25.0% |
+| Benign Pass Rate | 100% | 76.7% ± 5.8% | 80% | 90% | 70% |
+| **Replicates** | **k = 3** | **k = 3** | k = 1 | k = 1 | k = 1 |
 
-**Deployment recommendation, given these measurements:** **loose verifier alone** — matches classifier-only ASR with 10pp better benign pass rate, and avoids the retry-paradox amplification. See [§4.6, §4.7](final_report.md#46-combined-defense-end-to-end-measured) for the full corner-case analysis.
+> [!IMPORTANT]
+> **No deployment recommendation is made, and the previous one is withdrawn.** An earlier version of this README recommended "loose verifier alone". That number is a single run, and this harness has a **measured run-to-run SD of 12.1 pp** — comparable to the entire gap between the configurations being ranked. The four trained-defense columns have never been measured to a precision that supports comparing them. Replicating them at k ≥ 3 through [`scripts/eval_p0.py`](scripts/eval_p0.py) is the top open item.
+>
+> **Biggest caveat on the hardened column**: the attack log was generated by PAIR against the *naive* prompt, so 0% reflects a non-adaptive attacker as much as a good prompt. See [§9.3-E2](final_report.md#93-concrete-experiments-to-close-the-gaps).
 
 ## Threat model
 
@@ -72,7 +84,9 @@ The user is legitimate; the attacker is anyone who can place an email in the use
 | GRPO RL | ~31 min | ~6 GB | 0 |
 | Classifier train | ~5 min | ~4 GB | 0 |
 | All four corner-case evals | ~45 min | ~5.5 GB (Qwen + ModernBERT loaded) | ~$0.40 |
-| **End-to-end** | **~1 h 45 min** | 8 GB sufficient | **~$0.60** |
+| P0 replicate sweep (2 configs x k=3) | ~80 min | 0 | ~$1 |
+| SFT behavioral eval (§4.8) | ~10 min | ~4 GB | 0 |
+| **End-to-end** | **~3 h 15 min** | 8 GB sufficient | **~$1.60** |
 
 ## Quick start
 
@@ -84,23 +98,33 @@ cp .env.example .env  # fill OPENAI_API_KEY
 # 2. Run the eval pipeline (assumes adapters already trained — see final_report.md §3 for training)
 $env:PYTHONIOENCODING="utf-8"
 uv run python eval_combined.py        # 4 corner cases, ~45 min
-uv run python scripts/audit_report_numbers.py  # expect 51/51 OK
+uv run python scripts/eval_p0.py --k 3 # replicated naive vs hardened baselines, ~80 min
+
+# 3. Verify every reported number against its result file
+uv run python scripts/audit_report_numbers.py  # expect 61/61 OK
+uv run python scripts/audit_p0_numbers.py      # expect 79/79 OK
 ```
 
-For the rigorous end-to-end report (~770 lines, 13 sections, threats to validity, lessons learned), see **[final_report.md](final_report.md)**.
+Two documents, read in this order:
+
+- **[final_report.md](final_report.md)** — the full study: threat model, training pipeline, results, lessons. Opens with an audit ledger (§1.1) giving each headline claim's current status.
+- **[p0_analysis.md](p0_analysis.md)** — the audit itself: methodology, the paired tests, and what each retraction rests on.
 
 ## Where to find each result
 
 | Question | File |
 |---|---|
 | What's the overall story? | [final_report.md](final_report.md) |
-| Per-attack baseline ASR | `results/attack_baseline.json` |
+| Which claims survived the audit, and why? | [final_report.md §1.1](final_report.md#11-audit-ledger) · [p0_analysis.md](p0_analysis.md) |
+| Replicated naive vs hardened baselines | `results/p0_summary.json`, `results/{attack,benign}_p0_{naive,hardened}_r{1,2,3}.json` |
+| SFT vs GRPO on held-out attacks (§4.8) | `results/behavioral_attack_qwen-injection-sft.json` vs `results/grpo_behavioral_attack.json` |
 | Per-attack with classifier guard | `results/attack_guard.json` |
 | Per-attack with GRPO verifier (strict / loose) | `results/attack_verifier_only{,_loose}.json` |
 | Per-attack combined defense | `results/attack_combined{,_loose}.json` |
-| GRPO standalone behavioral eval | `results/grpo_behavioral_attack.json` |
 | Training curves | `results/grpo_{reward_curve,clipped_ratio,kl,length}.png` |
-| Verification that the report's numbers match the files | `scripts/audit_report_numbers.py` |
+| Paired significance tests / confidence intervals | [`src/stats.py`](src/stats.py) — Wilson, Newcombe, exact McNemar |
+| The semantic scorer behind §4.2 (reconstructed) | [`src/strict_scorer.py`](src/strict_scorer.py) — `validate_against_stored()` |
+| Verification that reported numbers match the files | `scripts/audit_report_numbers.py` · `scripts/audit_p0_numbers.py` |
 
 ## Repo layout
 
@@ -109,8 +133,11 @@ email-agent-redteam/
 ├── README.md                       # this file
 ├── final_report.md                 # rigorous experimental writeup (~770 lines)
 ├── demo/                           # Streamlit dashboard (4 tabs)
+├── p0_analysis.md                  # the self-audit: paired tests, replicates, retractions
 ├── src/
 │   ├── agent.py                    # LangGraph ReAct agent + 5 tools + Guard interface
+│   ├── stats.py                    # Wilson / Newcombe / exact McNemar for small-n proportions
+│   ├── strict_scorer.py            # semantic scorer behind §4.2 (reconstructed + validated)
 │   ├── redteam.py                  # PAIR campaign driver
 │   ├── eval.py                     # attack replay + benign harness
 │   ├── sft_warmup.py               # Stage 1 training
@@ -129,7 +156,9 @@ email-agent-redteam/
 ├── adapters/                       # trained model weights (gitignored)
 ├── results/                        # JSON metrics + PNG plots (gitignored)
 ├── scripts/
-│   └── audit_report_numbers.py     # 51-claim numeric audit
+│   ├── audit_report_numbers.py     # 61-claim numeric audit of final_report.md
+│   ├── audit_p0_numbers.py         # 79-claim numeric audit of p0_analysis.md
+│   └── eval_p0.py                  # replicated baselines + paired significance tests
 ├── eval_grpo_attack.py             # Stage 9: GRPO standalone behavioral eval
 ├── eval_combined.py                # Stage 10: four corner cases (strict)
 ├── eval_combined_loose.py          # Stage 10 ablation: loose verifier
@@ -141,9 +170,10 @@ email-agent-redteam/
 
 | Check | Status |
 |---|---|
-| Every number cited in `final_report.md` traces to a result file | ✅ 51/51 (`scripts/audit_report_numbers.py`) |
+| Every number cited in `final_report.md` traces to a result file | ✅ 61/61 (`scripts/audit_report_numbers.py`) |
+| Every number cited in `p0_analysis.md` traces to a result file | ✅ 79/79 (`scripts/audit_p0_numbers.py`) |
 | Adapter weights checked in via git-lfs | ❌ adapters/ is gitignored (regenerate via RUNBOOK §4–6) |
-| OpenAI temperature / seed | ⚠️ temperature=0 set, seed not exposed by `gpt-4o-mini`; ~1–3 pp run-to-run drift expected (T8 in §9.1) |
+| OpenAI temperature / seed | ⚠️ **temperature=0 is not enough.** Measured run-to-run SD is **12.1 pp** with a pinned `gpt-4o-mini-2024-07-18` snapshot; 20/38 attack rows flip outcome between identical replays. Any single-run number here carries that. (T8 in §9.1) |
 | PAIR campaign | Deterministic up to OpenAI sampling; `MAX_PAIR_ROUNDS=2` (lower than literature norm — T13 in §9.1) |
 | Training | Seeds pinned for classifier dataset split and GRPO prompt shuffle; GRPO rollouts not pinned |
 
@@ -155,7 +185,7 @@ The findings here build on or contrast with:
 
 - **Greshake et al.** *Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection.* AISec @ CCS 2023. [arXiv:2302.12173](https://arxiv.org/abs/2302.12173) — defines the indirect prompt injection threat model used here.
 - **Chao et al.** *Jailbreaking Black Box Large Language Models in Twenty Queries.* 2023. [arXiv:2310.08419](https://arxiv.org/abs/2310.08419) — the PAIR methodology used by `src/redteam.py`.
-- **Tramèr et al.** *On Adaptive Attacks to Adversarial Example Defenses.* NeurIPS 2020. [arXiv:2002.08347](https://arxiv.org/abs/2002.08347) — the closest precedent for the agent-retry paradox.
+- **Tramèr et al.** *On Adaptive Attacks to Adversarial Example Defenses.* NeurIPS 2020. [arXiv:2002.08347](https://arxiv.org/abs/2002.08347) — the adaptive-evaluation discipline this project applied to itself in §7.7.
 - **Shao et al.** *DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models.* 2024. [arXiv:2402.03300](https://arxiv.org/abs/2402.03300) — original GRPO formulation.
 - **Skalse et al.** *Defining and Characterizing Reward Hacking.* NeurIPS 2022. [arXiv:2209.13085](https://arxiv.org/abs/2209.13085) — theoretical framing for the §4.2 reward-hacking observation.
 - **Rafailov et al.** *Direct Preference Optimization: Your Language Model is Secretly a Reward Model.* 2023. [arXiv:2305.18290](https://arxiv.org/abs/2305.18290) — the method that failed in §3.2.5.

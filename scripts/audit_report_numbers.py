@@ -109,6 +109,30 @@ def main() -> int:
         chk("GRPO behavioral strict A3=8.3%",
             round(gbeh["strict_asr_by_category"]["exfiltration"] * 100, 1) == 8.3)
 
+        # Refusal rates. These went unchecked for the life of this script, which
+        # is how final_report.md §4.2 carried "A1 100% / A2 71% / A3 92%" — figures
+        # in no result file — through a 51/51 passing audit. An audit constrains
+        # only what it enumerates.
+        rr, rrc = gbeh["refusal_rate_overall"], gbeh["refusal_rate_by_category"]
+        chk("GRPO refusal overall=50.0%", round(rr * 100, 1) == 50.0)
+        chk("GRPO refusal A1=66.7%", round(rrc["override"] * 100, 1) == 66.7)
+        chk("GRPO refusal A2=57.1%", round(rrc["hidden_injection"] * 100, 1) == 57.1)
+        chk("GRPO refusal A3=25.0%", round(rrc["exfiltration"] * 100, 1) == 25.0)
+
+    # --- SFT behavioral standalone: the §4.8 comparison ---
+    sftb = load(R / "behavioral_attack_qwen-injection-sft.json")
+    if sftb:
+        chk("SFT behavioral n=38", sftb["n"] == 38)
+        chk("SFT regex ASR=2.6%", round(sftb["asr_overall"] * 100, 1) == 2.6)
+        chk("SFT strict ASR=7.9%", round(sftb["strict_asr_overall"] * 100, 1) == 7.9)
+        chk("SFT refusal overall=86.8%",
+            round(sftb["refusal_rate_overall"] * 100, 1) == 86.8)
+        if gbeh:
+            chk("§4.8: RL lowered refusal rate (SFT > GRPO)",
+                sftb["refusal_rate_overall"] > gbeh["refusal_rate_overall"])
+            chk("§4.8: RL did not lower strict ASR",
+                sftb["strict_asr_overall"] <= gbeh["strict_asr_overall"])
+
     # --- combined defense (Step-1 update of final_report.md §1, §4.6) ---
     if av:
         chk("verifier-only ASR 15.8%", round(av["asr_overall"] * 100, 1) == 15.8)
