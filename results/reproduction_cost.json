@@ -1,0 +1,45 @@
+{
+  "rates": {
+    "input": 1.5e-07,
+    "output": 6e-07,
+    "cached_input": 7.5e-08
+  },
+  "measured_arms": {
+    "V0": {
+      "rollouts": 36,
+      "cost_usd": 0.0888,
+      "per_rollout_usd": 0.002466,
+      "agent_tokens": {
+        "input_tokens": 430885,
+        "output_tokens": 65163,
+        "cache_read": 227712
+      },
+      "attacker_tokens": {
+        "prompt_tokens": 12134,
+        "completion_tokens": 507
+      },
+      "section": "\u00a74.12"
+    },
+    "V1": {
+      "rollouts": 34,
+      "cost_usd": 0.0778,
+      "per_rollout_usd": 0.002289,
+      "agent_tokens": {
+        "input_tokens": 407353,
+        "output_tokens": 60693,
+        "cache_read": 281344
+      },
+      "attacker_tokens": {
+        "prompt_tokens": 8113,
+        "completion_tokens": 338
+      },
+      "section": "\u00a74.12"
+    }
+  },
+  "measured_total_usd": 0.1666,
+  "measured_rollouts": 70,
+  "cache_fraction": 0.6073,
+  "extrapolated_historical_usd": 1.1245,
+  "project_total_estimate_usd": 1.2911,
+  "caveat": "only the four E2 arms are metered; historical runs are a unit-cost extrapolation, not a measurement"
+}

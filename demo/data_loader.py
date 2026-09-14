@@ -16,8 +16,12 @@ REPO = Path(__file__).resolve().parent.parent
 RESULTS = REPO / "results"
 DATA = REPO / "data"
 
-# Defense configurations in display order.
+# Defense configurations available in the replay picker, in display order.
+# The p0_* entries are the k=3 replicate runs behind report §3.4; r1 is shown
+# because every replicate has the same 38 rows and the picker only needs one.
 ATTACK_LABELS = [
+    "p0_naive_r1",
+    "p0_hardened_r1",
     "baseline",
     "guard",
     "verifier_only",
@@ -28,6 +32,8 @@ ATTACK_LABELS = [
 BENIGN_LABELS = ATTACK_LABELS  # symmetric
 
 DISPLAY_NAME = {
+    "p0_naive_r1": "Naive prompt (replicate 1)",
+    "p0_hardened_r1": "Hardened prompt (replicate 1)",
     "baseline": "Baseline (no defense)",
     "guard": "Classifier only",
     "verifier_only": "Verifier (strict)",
@@ -50,15 +56,23 @@ def load_benign(label: str) -> dict:
 
 
 @st.cache_data
-def load_grpo_behavioral() -> dict:
-    """Load the GRPO standalone behavioral eval (`eval_grpo_attack.py` output)."""
-    return json.loads((RESULTS / "grpo_behavioral_attack.json").read_text(encoding="utf-8"))
+def load_result(name: str) -> dict | None:
+    """Load an arbitrary `results/{name}.json`, or None if it has not been generated.
+
+    Used for the instrument-audit artefacts (report §4), which are produced by
+    the `scripts/*.py` drivers rather than by training. Returning None lets the
+    page degrade to a "not generated" note instead of crashing.
+    """
+    p = RESULTS / f"{name}.json"
+    if not p.exists():
+        return None
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 @st.cache_data
-def load_grpo_train() -> dict:
-    """Load the GRPO training summary."""
-    return json.loads((RESULTS / "grpo_train.json").read_text(encoding="utf-8"))
+def load_grpo_behavioral() -> dict:
+    """Load the GRPO standalone behavioral eval (`eval_grpo_attack.py` output)."""
+    return json.loads((RESULTS / "grpo_behavioral_attack.json").read_text(encoding="utf-8"))
 
 
 @st.cache_data

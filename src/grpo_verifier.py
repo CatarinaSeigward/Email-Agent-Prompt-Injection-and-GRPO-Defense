@@ -78,9 +78,18 @@ class GrpoVerifier:
         self.tok = AutoTokenizer.from_pretrained(self.base_model)
         if self.tok.pad_token is None:
             self.tok.pad_token = self.tok.eos_token
+        # NOTE: device_map="auto" segfaults here (Windows access violation
+        # 0xC0000005) with transformers 4.57.6 / accelerate 1.13.0 / torch 2.6.0
+        # — the process dies during from_pretrained with no Python traceback, so
+        # eval_combined.py and any verifier config become unreproducible rather
+        # than merely failing. Explicit placement avoids the accelerate dispatch
+        # path entirely and is equivalent here: the model fits on one device.
+        # Same class of defect as §7.1 — a library interaction that kills the run
+        # without raising.
+        device = "cuda" if torch.cuda.is_available() else "cpu"
         model = AutoModelForCausalLM.from_pretrained(
-            self.base_model, torch_dtype=torch.bfloat16, device_map="auto"
-        )
+            self.base_model, dtype=torch.bfloat16
+        ).to(device)
         self.model = PeftModel.from_pretrained(model, str(self.adapter_path))
         self.model.eval()
         print(f"[GrpoVerifier] loaded; gated tools = {GATED_TOOLS}")

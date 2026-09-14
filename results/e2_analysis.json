@@ -1,0 +1,11 @@
+{
+  "scorer": "src/eval.py::is_attack_success",
+  "threshold_c": 6,
+  "n_seeds": 30,
+  "arm_B_cracked": 0,
+  "arm_A1_cracked": 0,
+  "headline_p": 1.0,
+  "headline_significant": false,
+  "upper_bound_95": 0.095,
+  "p3_evaluable": false
+}

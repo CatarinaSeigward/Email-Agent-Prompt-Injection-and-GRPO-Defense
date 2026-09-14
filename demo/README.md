@@ -1,7 +1,7 @@
 # Demo · Streamlit dashboard
 
-Simplified, executive-summary version of the project. Two tabs, no model
-inference, no API calls. Full report on GitHub.
+Interactive companion to [`final_report.md`](../final_report.md), following its
+structure section by section. Two tabs, no model inference, no API calls.
 
 **Live URL**: <https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/>
 
@@ -13,63 +13,65 @@ $env:PYTHONIOENCODING="utf-8"
 uv run streamlit run demo/app.py
 ```
 
-Opens `http://localhost:8501` automatically. Two tabs:
+Opens `http://localhost:8501`. Two tabs:
 
-- **Findings** — single-page summary: the audit ledger of which claims
-  survived, the ASR chart, the prompt-only baseline, the reward-hacking
-  inspector, and the training trajectory comparison.
-- **Replay an attack** — pick one of the 38 PAIR-generated attacks and
-  watch the agent trace under two defense configurations side by side.
-  The per-row attempt counter is the direct evidence for §7.7: the agent
-  attempts ~25 destructive calls regardless of configuration, because it
-  sweeps a 25-email inbox rather than retrying blocked calls.
+- **Findings** — mirrors the report. §1 the question and the ledger; §3 what
+  the three defenses did, with a per-completion inspector that scores one
+  GRPO output three ways; **§4 eight ways the instruments were wrong** — the
+  judge-fabrication table, an interactive sweep of the scorer's
+  `REPLY_EXFIL_MIN_BODY` constant, the classifier threshold sweep, and the
+  resolution diagnostics; §5 what was retracted; §7 next steps; §8 measured cost.
+- **Replay an attack** — pick one of the 38 attacks and compare two
+  configurations side by side. Defaults to **naive vs hardened prompt**, which
+  shows the one result no scorer, judge or sample size can move: zero
+  destructive calls. Among trained configurations the per-row attempt counter
+  is the direct evidence for §5.1 — ~25 attempts regardless of guard, because
+  the agent sweeps a 26-email inbox rather than retrying.
 
-A collapsible Glossary at the top of each tab defines every term used
-(A1/A2/A3, ASR, PAIR, GRPO, LoRA, verifier / classifier / combined, strict
-vs loose, reward hacking, paired significance testing, run-to-run SD).
+A collapsible Glossary at the top of each tab defines every term
+(A1/A2/A3, ASR, in-band vs out-of-band, MDE, judge fabrication, scorer free
+parameter, paired McNemar, retracted finding).
 
-> **Note on retractions.** This dashboard previously presented the
+> **Note on retractions.** Earlier versions of this dashboard presented the
 > *agent-retry paradox* as the headline finding and recommended the loose
-> verifier for deployment. Both have been withdrawn — see
-> [`p0_analysis.md`](../p0_analysis.md). The pages now carry the retraction
-> inline rather than silently dropping it, so a reader who saw the earlier
-> version can find out what happened.
+> verifier for deployment. Both were withdrawn ([`p0_analysis.md`](../p0_analysis.md)).
+> The dashboard carries the retractions inline (§5) rather than dropping them.
 
-## Deploy to Streamlit Community Cloud (free, public URL)
+## Deploy to Streamlit Community Cloud
 
-1. Push the repo to GitHub (the `results/` directory is tracked — see root `.gitignore`)
-2. Visit [share.streamlit.io](https://share.streamlit.io) and connect your GitHub account
-3. New app → pick this repo → main file `demo/app.py` → Python 3.11
-4. Deploy. Streamlit reads `pyproject.toml` for dependencies automatically.
+1. Push the repo to GitHub (`results/` is tracked — see root `.gitignore`)
+2. [share.streamlit.io](https://share.streamlit.io) → New app → this repo → `demo/app.py` → Python 3.11
+3. Streamlit reads `demo/requirements.txt` (CPU-only; no torch)
 
 ## Data source
 
-Everything renders from:
+Everything renders from `results/*.json` and `data/attack_log.jsonl`:
 
-- `results/attack_{baseline,guard,verifier_only,combined,verifier_only_loose,combined_loose}.json`
-- `results/benign_*.json` (same set of labels)
-- `results/grpo_train.json`, `results/grpo_behavioral_attack.json`
-- `results/behavioral_attack_qwen-injection-sft.json` (the §4.8 SFT-vs-GRPO comparison)
-- `results/p0_summary.json` and `results/{attack,benign}_p0_{naive,hardened}_r{1,2,3}.json`
-- `results/grpo_{reward_curve,clipped_ratio,kl,length}.png`
-- `data/attack_log.jsonl` (for the attack email bodies shown in tabs 2 and 4)
+| Page section | Files | Regenerate with |
+|---|---|---|
+| §3.1 configurations | `attack_{baseline,guard,verifier_only,combined}.json`, `attack_p0_hardened_r1.json`, `benign_*.json` | `eval_combined.py`, `scripts/eval_p0.py` |
+| §3.2 inspector | `grpo_behavioral_attack.json` | `eval_grpo_attack.py` |
+| §3.4 adaptive attack | `e2_analysis.json` | `scripts/e2_analyze.py` |
+| §4.1 judge | `e2_rescore.json` | `scripts/e2_rescore.py` |
+| §4.2 scorer sweep | `scorer_sensitivity.json` | `scripts/scorer_sensitivity.py` |
+| §4.4 classifier | `classifier_threshold_sweep.json` | `scripts/classifier_threshold_sweep.py` |
+| §4.5 resolution | `resolution_diagnostics.json`, `e2v_analysis.json` | `scripts/resolution_diagnostics.py`, `scripts/e2v_analyze.py` |
+| §8 cost | `reproduction_cost.json` | `scripts/reproduction_cost.py` |
+| Replay tab | any `attack_*.json` with a `details` array; attack bodies from `attack_log.jsonl` | — |
 
-To re-generate any of these from scratch, see `final_report.md` §3 (training) and the top-level driver scripts (`eval_combined.py`, `eval_grpo_attack.py`, etc.).
+Sections whose result file is missing render a one-line "not generated" note
+instead of crashing, so a partial `results/` dump still produces a usable page.
 
-## Files in this directory
+## Files
 
 ```
 demo/
-├── app.py          # main Streamlit app (2 tabs in one file)
-├── data_loader.py  # @st.cache_data wrappers over the JSON files
-└── README.md       # this file
+├── app.py            # both tabs in one file
+├── data_loader.py    # @st.cache_data wrappers; load_result() for the §4 artefacts
+├── requirements.txt  # streamlit + plotly + pandas only
+└── README.md
 ```
 
-## Non-goals (intentional simplifications)
+## Non-goals
 
-- No user authentication / per-session state
-- No live model inference (would require GPU + OpenAI calls)
-- No custom CSS beyond Streamlit defaults
-- No multi-language toggle (English UI with Chinese caption on title)
-
-For the full project narrative see [`final_report.md`](../final_report.md).
+No authentication, no live inference, no custom CSS, no language toggle.

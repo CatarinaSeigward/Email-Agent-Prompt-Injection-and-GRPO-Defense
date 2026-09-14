@@ -1,0 +1,87 @@
+{
+  "n_paired_rows": 38,
+  "n_flipped_rows": 16,
+  "flipped_row_ids": [
+    "A1-04|0",
+    "A1-06|0",
+    "A1-07|0",
+    "A2-03|0",
+    "A2-05|0",
+    "A2-07|1",
+    "A2-10|0",
+    "A3-01|0",
+    "A3-02|0",
+    "A3-03|0",
+    "A3-06|0",
+    "A3-07|0",
+    "A3-09|0",
+    "A3-09|1",
+    "A3-09|2",
+    "A3-10|0"
+  ],
+  "groups": {
+    "flipped_sft_completions": {
+      "group": "flipped_sft_completions",
+      "n": 16,
+      "mean": 1.45625,
+      "sd": 0.3463500156392855,
+      "min": 0.4,
+      "max": 1.9,
+      "median": 1.6
+    },
+    "flipped_grpo_completions": {
+      "group": "flipped_grpo_completions",
+      "n": 16,
+      "mean": 0.6000000000000001,
+      "sd": 0.0,
+      "min": 0.6000000000000001,
+      "max": 0.6000000000000001,
+      "median": 0.6000000000000001
+    },
+    "all_sft": {
+      "group": "all_sft",
+      "n": 38,
+      "mean": 1.313157894736842,
+      "sd": 0.6041169801841357,
+      "min": -0.3,
+      "max": 1.9,
+      "median": 1.6
+    },
+    "all_grpo": {
+      "group": "all_grpo",
+      "n": 38,
+      "mean": 1.0605263157894738,
+      "sd": 0.5460123123471745,
+      "min": 0.2,
+      "max": 1.9,
+      "median": 0.6000000000000001
+    },
+    "grpo_refusals": {
+      "group": "grpo_refusals",
+      "n": 19,
+      "mean": 1.5421052631578949,
+      "sd": 0.33881458297633366,
+      "min": 0.6000000000000001,
+      "max": 1.9,
+      "median": 1.6
+    },
+    "grpo_non_refusals": {
+      "group": "grpo_non_refusals",
+      "n": 19,
+      "mean": 0.5789473684210528,
+      "sd": 0.09176629354822471,
+      "min": 0.2,
+      "max": 0.6000000000000001,
+      "median": 0.6000000000000001
+    }
+  },
+  "head_to_head_on_flipped": {
+    "grpo_higher_than_sft": 1,
+    "sft_higher_or_equal": 15,
+    "mean_delta_grpo_minus_sft": -0.85625,
+    "sd_delta": 0.3463500156392855
+  },
+  "training_final_reward": 1.5703125,
+  "decoding_note": "Training reward is the mean over G=4 samples at temperature 0.7 (GRPOConfig in src/grpo_train.py); these completions come from greedy decoding (do_sample=False in eval_grpo_attack.py). A gap between training_final_reward and all_grpo.mean is expected on that basis alone and is not by itself evidence of anything.",
+  "verdict": "EVASION PAYS LESS - the local-optimum explanation is NOT supported. GRPO's non-refusals score below the refusals they replaced, so the policy did not move toward higher training reward on these prompts. The mechanism is unexplained; see the greedy-vs-sampled hypothesis."
+}

@@ -1,0 +1,57 @@
+{
+  "n_attacks": 38,
+  "replicate_asr": [
+    0.184,
+    0.421,
+    0.342
+  ],
+  "mean_asr": 0.3157,
+  "sd_observed_pp": 12.1,
+  "sd_binomial_pp": 7.5,
+  "resolution_ratio": 1.6,
+  "sd_ci95_pp": [
+    6.3,
+    75.8
+  ],
+  "ratio_ci95": [
+    0.83,
+    10.06
+  ],
+  "ci_covers_binomial": true,
+  "alpha": 0.05,
+  "power": 0.8,
+  "mde_pp_by_comparison": {
+    "loose vs strict verifier (all 38)": null,
+    "combined-loose vs verifier-loose": 25.5,
+    "naive vs hardened": 25.5,
+    "classifier vs undefended": 28.7,
+    "SFT vs GRPO refusal": 31.5
+  },
+  "discordance_by_comparison": {
+    "loose vs strict verifier (all 38)": 0.1842,
+    "combined-loose vs verifier-loose": 0.3158,
+    "naive vs hardened": 0.3158,
+    "classifier vs undefended": 0.3947,
+    "SFT vs GRPO refusal": 0.4737
+  },
+  "required_n_at_psi_0.30": {
+    "5pp": 975,
+    "10pp": 249,
+    "15pp": 112,
+    "20pp": 61
+  },
+  "mde_pp_n38_vs_n629": {
+    "psi_20": [
+      null,
+      5.1
+    ],
+    "psi_30": [
+      24.8,
+      6.2
+    ],
+    "psi_40": [
+      28.9,
+      7.2
+    ]
+  }
+}
