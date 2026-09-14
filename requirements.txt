@@ -1,0 +1,18 @@
+# Dependency file for Streamlit Community Cloud — MUST live at the repo root.
+#
+# Streamlit Cloud resolves dependencies by searching from the repository root,
+# and it picks the first file it recognises. With only `pyproject.toml` present
+# it installed the full training stack — torch pinned to a CUDA 12.4 wheel index
+# via [tool.uv.sources], plus transformers / trl / peft / bitsandbytes — into a
+# CPU-only Linux container. That build fails, and the app surfaces the failure as
+# an ImportError with the message redacted.
+#
+# `demo/requirements.txt` is never reached, because root wins. This file exists
+# so the deployed demo installs only what it actually needs: it reads JSON and
+# renders Plotly charts, with no model inference and no API calls.
+#
+# Keep in sync with demo/requirements.txt.
+
+streamlit>=1.57.0,<2.0
+plotly>=6.0,<7.0
+pandas>=2.0,<4.0

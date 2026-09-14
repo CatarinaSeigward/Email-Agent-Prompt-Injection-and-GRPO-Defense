@@ -1,13 +1,14 @@
 # Minimal dependencies for the Streamlit demo.
 #
-# The demo only reads JSON files and renders Plotly charts — it does not
-# run any model inference. The full project's pyproject.toml pins torch
-# to a CUDA wheel that won't install on Streamlit Community Cloud's
-# CPU-only Linux environment, so we use this stripped-down requirements
-# file for deployment.
+# NOTE: Streamlit Community Cloud does NOT read this file. It resolves
+# dependencies from the repository ROOT and stops at the first recognised
+# file, so `../requirements.txt` is what actually gets installed. This copy
+# is kept for running the demo standalone from this directory; keep the two
+# in sync.
 #
-# Versions match what's resolved in uv.lock as of v0.1.
+# The demo only reads JSON and renders Plotly charts — no model inference,
+# no API calls, so none of the training stack is needed.
 
 streamlit>=1.57.0,<2.0
-plotly>=5.0,<7.0
-pandas>=2.0,<3.0
+plotly>=6.0,<7.0
+pandas>=2.0,<4.0

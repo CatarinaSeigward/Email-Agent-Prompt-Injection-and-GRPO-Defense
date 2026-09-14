@@ -41,7 +41,17 @@ parameter, paired McNemar, retracted finding).
 
 1. Push the repo to GitHub (`results/` is tracked — see root `.gitignore`)
 2. [share.streamlit.io](https://share.streamlit.io) → New app → this repo → `demo/app.py` → Python 3.11
-3. Streamlit reads `demo/requirements.txt` (CPU-only; no torch)
+3. Streamlit installs from **`requirements.txt` at the repository root**
+
+> [!IMPORTANT]
+> **Streamlit Cloud does not read `demo/requirements.txt`.** It resolves
+> dependencies from the repo root and stops at the first file it recognises.
+> With only `pyproject.toml` at root it installed the full training stack —
+> torch pinned to a CUDA 12.4 wheel index via `[tool.uv.sources]`, plus
+> transformers / trl / peft / bitsandbytes — into a CPU-only container. The
+> build fails and the app reports it as an `ImportError` with the message
+> redacted, which points at the wrong line. Root `requirements.txt` exists to
+> shadow `pyproject.toml`; do not delete it.
 
 ## Data source
 
