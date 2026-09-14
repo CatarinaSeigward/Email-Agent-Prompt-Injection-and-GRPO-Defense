@@ -1,6 +1,8 @@
 """Generate the attack-and-defense concept diagram (v2, post-audit).
 
-Revision of make_concept.py to match the audited report (2026-08-07):
+Supersedes make_concept.py, which was deleted 2026-09-14 along with its outputs
+(attack_concept.png/svg) once nothing referenced them. What it got wrong, kept
+here because the corrections are the point:
 
 - Gate order now matches runtime. §4.6/§5: the ModernBERT classifier runs
   FIRST (~5 ms) and short-circuits; the Qwen verifier escalates only on

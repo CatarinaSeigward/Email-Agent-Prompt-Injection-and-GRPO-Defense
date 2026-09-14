@@ -1,6 +1,7 @@
 """Generate the project pipeline diagram (v2, post-audit).
 
-Revision of make_pipeline.py to match the audited report (2026-08-07).
+Supersedes make_pipeline.py, which was deleted 2026-09-14 along with its outputs
+(pipeline.png/svg) once nothing referenced them. What it got wrong:
 
 Stale numbers corrected (all re-measured 2026-08-21):
   - adapters/qwen-injection-grpo   73 MB  ->  86 MB

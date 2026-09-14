@@ -43,6 +43,17 @@ DISPLAY_NAME = {
 }
 
 
+def _has(label: str) -> bool:
+    return (RESULTS / f"attack_{label}.json").exists()
+
+
+# Labels whose result files are actually present. Deployment to Streamlit Cloud
+# syncs this repo by hand, so a partial push is a real failure mode: without this
+# filter a single missing JSON takes the whole page down with FileNotFoundError.
+# Every consumer should iterate this, not ATTACK_LABELS.
+AVAILABLE_ATTACK_LABELS = [lbl for lbl in ATTACK_LABELS if _has(lbl)]
+
+
 @st.cache_data
 def load_attack(label: str) -> dict:
     """Load `results/attack_{label}.json`."""
@@ -70,9 +81,9 @@ def load_result(name: str) -> dict | None:
 
 
 @st.cache_data
-def load_grpo_behavioral() -> dict:
-    """Load the GRPO standalone behavioral eval (`eval_grpo_attack.py` output)."""
-    return json.loads((RESULTS / "grpo_behavioral_attack.json").read_text(encoding="utf-8"))
+def load_grpo_behavioral() -> dict | None:
+    """GRPO standalone behavioral eval (`eval_grpo_attack.py`), or None if absent."""
+    return load_result("grpo_behavioral_attack")
 
 
 @st.cache_data
@@ -88,6 +99,13 @@ def load_attack_emails() -> dict:
 
 @st.cache_data
 def load_attack_meta() -> list[tuple[str, str, int]]:
-    """List of (seed_id, category, round) tuples in baseline order — used for the seed picker."""
-    baseline = load_attack("baseline")
-    return [(r["seed_id"], r["category"], r.get("round", 0)) for r in baseline["details"]]
+    """(seed_id, category, round) tuples for the seed picker.
+
+    Keyed off whichever attack file is actually deployed — every config replays
+    the same 38 rows, so any of them gives the same seed list.
+    """
+    if not AVAILABLE_ATTACK_LABELS:
+        return []
+    src = "baseline" if "baseline" in AVAILABLE_ATTACK_LABELS else AVAILABLE_ATTACK_LABELS[0]
+    return [(r["seed_id"], r["category"], r.get("round", 0))
+            for r in load_attack(src)["details"]]

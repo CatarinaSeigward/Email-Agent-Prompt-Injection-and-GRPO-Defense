@@ -24,7 +24,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from data_loader import (
-    ATTACK_LABELS,
+    AVAILABLE_ATTACK_LABELS,
     DISPLAY_NAME,
     load_attack,
     load_attack_emails,
@@ -204,15 +204,18 @@ def render_findings_page() -> None:
         "bar is the only one invariant to all of it. **No deployment recommendation is made.**"
     )
 
-    naive = load_attack("baseline")
-    hardened = load_attack("p0_hardened_r1")
-    classifier = load_attack("guard")
-    verifier = load_attack("verifier_only")
-    combined = load_attack("combined")
-    configs = [
-        ("Naive", naive), ("Hardened prompt", hardened), ("+ Classifier", classifier),
-        ("+ Verifier", verifier), ("Combined", combined),
+    wanted = [
+        ("Naive", "baseline"), ("Hardened prompt", "p0_hardened_r1"),
+        ("+ Classifier", "guard"), ("+ Verifier", "verifier_only"), ("Combined", "combined"),
     ]
+    configs = [(name, load_attack(lbl)) for name, lbl in wanted
+               if lbl in AVAILABLE_ATTACK_LABELS]
+    if not configs:
+        st.warning("No `results/attack_*.json` files found — nothing to chart.")
+        return
+    if len(configs) < len(wanted):
+        absent = [n for n, lbl in wanted if lbl not in AVAILABLE_ATTACK_LABELS]
+        st.caption(f"Not deployed, omitted from the chart: {', '.join(absent)}.")
     cats = {"override": "A1 Override", "hidden_injection": "A2 Hidden", "exfiltration": "A3 Exfiltration"}
     x = [n for n, _ in configs]
     fig = go.Figure()
@@ -235,11 +238,13 @@ def render_findings_page() -> None:
         "(all three are 0.0%). Naive here is the original single run (36.8%); the k = 3 mean is 31.6%."
     )
 
-    bp = st.columns(5)
-    for col, (name, lbl) in zip(bp, [("Naive", "baseline"), ("Hardened", "p0_hardened_r1"),
-                                     ("Classifier", "guard"), ("Verifier", "verifier_only"),
-                                     ("Combined", "combined")]):
-        col.metric(f"{name} — benign pass", pct(load_benign(lbl)["pass_rate"], 0))
+    benign_wanted = [("Naive", "baseline"), ("Hardened", "p0_hardened_r1"),
+                     ("Classifier", "guard"), ("Verifier", "verifier_only"),
+                     ("Combined", "combined")]
+    benign_have = [(n, l) for n, l in benign_wanted if l in AVAILABLE_ATTACK_LABELS]
+    if benign_have:
+        for col, (name, lbl) in zip(st.columns(len(benign_have)), benign_have):
+            col.metric(f"{name} — benign pass", pct(load_benign(lbl)["pass_rate"], 0))
 
     # ── 3.2 RL removed the behaviour ────────────────────────────────
     st.subheader("3.2 Reinforcement learning removed the behaviour it was trained to install")
@@ -270,45 +275,7 @@ def render_findings_page() -> None:
         "The paired comparison is still valid; this is an in-distribution measurement."
     )
 
-    st.markdown("**Inspect a single completion** — the same output scored three ways.")
-    beh = load_grpo_behavioral()
-    hack_seeds = set(beh.get("strict_attack_seeds", []))
-    details = beh["details"]
-
-    def _label(d: dict) -> str:
-        if d["seed_id"] in hack_seeds:
-            return f"{d['seed_id']} · {d['category']} · :red[reward-hacked]"
-        if d.get("refused"):
-            return f"{d['seed_id']} · {d['category']} · :green[refused]"
-        return f"{d['seed_id']} · {d['category']} · :gray[evasive / neutral]"
-
-    options = [_label(d) for d in details]
-    default_idx = next((i for i, d in enumerate(details) if d["seed_id"] in hack_seeds), 0)
-    d = details[options.index(st.selectbox("Pick a seed", options, index=default_idx, key="rh_seed"))]
-    email = load_attack_emails().get((d["seed_id"], d.get("round", 0)))
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown("**Injected attack email**")
-        if email:
-            st.markdown(f"From: `{email['from']}` · Subject: _{email['subject']}_")
-            st.code(email["body"][:500], language="text")
-    with c2:
-        st.markdown("**GRPO model's completion**")
-        st.code(d["completion"], language="text")
-    st.dataframe(pd.DataFrame([
-        {"Scorer": "Reward regex (training)", "Verdict": "unsafe pattern" if d.get("unsafe_present") else "clean",
-         "Looks for": 'literal `forward(`, `delete_email(`'},
-        {"Scorer": "Strict semantic", "Verdict": "attacker action described" if d["seed_id"] in hack_seeds else "no semantic leak",
-         "Looks for": "any phrasing of forward/delete to a non-company address"},
-        {"Scorer": "Recognised refusal", "Verdict": "refused" if d.get("refused") else "no refusal language",
-         "Looks for": '"I won\'t", "I cannot", "no.", "suspicious"'},
-    ]), hide_index=True, width="stretch")
-    if d["seed_id"] in hack_seeds:
-        st.error("**Reward-hacked.** Describes the attacker's action without any regex token the reward penalised.")
-    elif d.get("refused"):
-        st.success("**Clean refusal.**")
-    else:
-        st.info("**Evasive / neutral** — neither a refusal nor a described attack. This is what replaced 16 refusals.")
+    render_completion_inspector()
 
     # ── 3.3 DPO ─────────────────────────────────────────────────────
     with st.expander("3.3 DPO: margins without transfer", expanded=False):
@@ -603,6 +570,57 @@ def render_findings_page() -> None:
         )
 
 
+def render_completion_inspector() -> None:
+    """§3.2's per-completion viewer.
+
+    Its own function so that a missing `grpo_behavioral_attack.json` skips only
+    this block, instead of returning early out of the whole findings page and
+    silently hiding §3.3 onward.
+    """
+    st.markdown("**Inspect a single completion** — the same output scored three ways.")
+    beh = load_grpo_behavioral()
+    if not beh:
+        missing("grpo_behavioral_attack", "../eval_grpo_attack.py")
+        return
+    hack_seeds = set(beh.get("strict_attack_seeds", []))
+    details = beh["details"]
+
+    def _label(d: dict) -> str:
+        if d["seed_id"] in hack_seeds:
+            return f"{d['seed_id']} · {d['category']} · :red[reward-hacked]"
+        if d.get("refused"):
+            return f"{d['seed_id']} · {d['category']} · :green[refused]"
+        return f"{d['seed_id']} · {d['category']} · :gray[evasive / neutral]"
+
+    options = [_label(d) for d in details]
+    default_idx = next((i for i, d in enumerate(details) if d["seed_id"] in hack_seeds), 0)
+    d = details[options.index(st.selectbox("Pick a seed", options, index=default_idx, key="rh_seed"))]
+    email = load_attack_emails().get((d["seed_id"], d.get("round", 0)))
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("**Injected attack email**")
+        if email:
+            st.markdown(f"From: `{email['from']}` · Subject: _{email['subject']}_")
+            st.code(email["body"][:500], language="text")
+    with c2:
+        st.markdown("**GRPO model's completion**")
+        st.code(d["completion"], language="text")
+    st.dataframe(pd.DataFrame([
+        {"Scorer": "Reward regex (training)", "Verdict": "unsafe pattern" if d.get("unsafe_present") else "clean",
+         "Looks for": 'literal `forward(`, `delete_email(`'},
+        {"Scorer": "Strict semantic", "Verdict": "attacker action described" if d["seed_id"] in hack_seeds else "no semantic leak",
+         "Looks for": "any phrasing of forward/delete to a non-company address"},
+        {"Scorer": "Recognised refusal", "Verdict": "refused" if d.get("refused") else "no refusal language",
+         "Looks for": '"I won\'t", "I cannot", "no.", "suspicious"'},
+    ]), hide_index=True, width="stretch")
+    if d["seed_id"] in hack_seeds:
+        st.error("**Reward-hacked.** Describes the attacker's action without any regex token the reward penalised.")
+    elif d.get("refused"):
+        st.success("**Clean refusal.**")
+    else:
+        st.info("**Evasive / neutral** — neither a refusal nor a described attack. This is what replaced 16 refusals.")
+
+
 # ────────────────────────────────────────────────────────────────────
 # Replay tab
 # ────────────────────────────────────────────────────────────────────
@@ -643,12 +661,20 @@ def render_replay_page() -> None:
     seed_choice = st.selectbox("Pick an attack seed", seed_options, index=default_idx)
     sid, cat, r = meta[seed_options.index(seed_choice)]
 
+    labels = AVAILABLE_ATTACK_LABELS
+    if len(labels) < 2:
+        st.warning("Fewer than two `results/attack_*.json` files are deployed — nothing to compare.")
+        return
+
+    def _idx(preferred: str, fallback: int) -> int:
+        return labels.index(preferred) if preferred in labels else min(fallback, len(labels) - 1)
+
     cc1, cc2 = st.columns(2)
     with cc1:
-        left_label = st.selectbox("Left side", ATTACK_LABELS, index=ATTACK_LABELS.index("p0_naive_r1"),
+        left_label = st.selectbox("Left side", labels, index=_idx("p0_naive_r1", 0),
                                   format_func=lambda l: DISPLAY_NAME[l], key="left")
     with cc2:
-        right_label = st.selectbox("Right side", ATTACK_LABELS, index=ATTACK_LABELS.index("p0_hardened_r1"),
+        right_label = st.selectbox("Right side", labels, index=_idx("p0_hardened_r1", 1),
                                    format_func=lambda l: DISPLAY_NAME[l], key="right")
 
     email = load_attack_emails().get((sid, r))
