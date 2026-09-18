@@ -1,0 +1,1697 @@
+{
+  "candidates": 300,
+  "trials": 3,
+  "judges": [
+    "gpt-4o-mini",
+    "claude-sonnet-5",
+    "gpt-4o"
+  ],
+  "errors": 0,
+  "egress_level": 3,
+  "pareto_degenerate": false,
+  "minutes": 301.4271937648455,
+  "checkpoints": [
+    {
+      "n": 25,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.5909090909090909,
+          "member_jaccard": 0.8260869565217391,
+          "n_elites_a": 17,
+          "n_elites_b": 18,
+          "n_elites_shared": 13
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.7142857142857143,
+          "member_jaccard": 0.8695652173913043,
+          "n_elites_a": 17,
+          "n_elites_b": 19,
+          "n_elites_shared": 15
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.85,
+          "member_jaccard": 0.9523809523809523,
+          "n_elites_a": 18,
+          "n_elites_b": 19,
+          "n_elites_shared": 17
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.5909090909090909,
+          "member_jaccard": 0.8260869565217391,
+          "n_elites_a": 17,
+          "n_elites_b": 18,
+          "n_elites_shared": 13
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.7142857142857143,
+          "member_jaccard": 0.9047619047619048,
+          "n_elites_a": 18,
+          "n_elites_b": 18,
+          "n_elites_shared": 15
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.85,
+          "member_jaccard": 0.9523809523809523,
+          "n_elites_a": 19,
+          "n_elites_b": 18,
+          "n_elites_shared": 17
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 25,
+          "n_admitted": 22,
+          "n_cells": 12,
+          "n_members": 22,
+          "n_elites": 17,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 2,
+            "hidden_injection/authority": 2,
+            "hidden_injection/markup": 2,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 2,
+            "override/authority": 3,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 1
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 25,
+          "n_admitted": 20,
+          "n_cells": 12,
+          "n_members": 20,
+          "n_elites": 18,
+          "cell_sizes": {
+            "exfiltration/authority": 1,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 2,
+            "hidden_injection/authority": 1,
+            "hidden_injection/markup": 2,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 1,
+            "override/authority": 3,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 2
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 25,
+          "n_admitted": 21,
+          "n_cells": 12,
+          "n_members": 21,
+          "n_elites": 19,
+          "cell_sizes": {
+            "exfiltration/authority": 1,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 2,
+            "hidden_injection/authority": 1,
+            "hidden_injection/markup": 2,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 2,
+            "override/authority": 3,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 2
+          }
+        },
+        "ORACLE": {
+          "n_seen": 25,
+          "n_admitted": 20,
+          "n_cells": 12,
+          "n_members": 20,
+          "n_elites": 18,
+          "cell_sizes": {
+            "exfiltration/authority": 1,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 2,
+            "hidden_injection/authority": 1,
+            "hidden_injection/markup": 2,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 2,
+            "override/authority": 3,
+            "override/markup": 1,
+            "override/routine": 1,
+            "override/technical": 2
+          }
+        }
+      }
+    },
+    {
+      "n": 50,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.43478260869565216,
+          "member_jaccard": 0.71875,
+          "n_elites_a": 18,
+          "n_elites_b": 15,
+          "n_elites_shared": 10
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.5454545454545454,
+          "member_jaccard": 0.7741935483870968,
+          "n_elites_a": 18,
+          "n_elites_b": 16,
+          "n_elites_shared": 12
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.631578947368421,
+          "member_jaccard": 0.8571428571428571,
+          "n_elites_a": 15,
+          "n_elites_b": 16,
+          "n_elites_shared": 12
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.43478260869565216,
+          "member_jaccard": 0.7419354838709677,
+          "n_elites_a": 18,
+          "n_elites_b": 15,
+          "n_elites_shared": 10
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.7647058823529411,
+          "member_jaccard": 0.8888888888888888,
+          "n_elites_a": 15,
+          "n_elites_b": 15,
+          "n_elites_shared": 13
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.55,
+          "member_jaccard": 0.8888888888888888,
+          "n_elites_a": 16,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 50,
+          "n_admitted": 29,
+          "n_cells": 12,
+          "n_members": 29,
+          "n_elites": 18,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 3,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 2,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 3,
+            "override/authority": 4,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 2
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 50,
+          "n_admitted": 26,
+          "n_cells": 12,
+          "n_members": 26,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 2,
+            "hidden_injection/authority": 1,
+            "hidden_injection/markup": 2,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 3,
+            "override/authority": 5,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 3
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 50,
+          "n_admitted": 26,
+          "n_cells": 12,
+          "n_members": 26,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 2,
+            "hidden_injection/authority": 1,
+            "hidden_injection/markup": 3,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 3,
+            "override/authority": 4,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 3
+          }
+        },
+        "ORACLE": {
+          "n_seen": 50,
+          "n_admitted": 25,
+          "n_cells": 12,
+          "n_members": 25,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 2,
+            "hidden_injection/authority": 1,
+            "hidden_injection/markup": 2,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 3,
+            "override/authority": 5,
+            "override/markup": 1,
+            "override/routine": 1,
+            "override/technical": 3
+          }
+        }
+      }
+    },
+    {
+      "n": 75,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.6190476190476191,
+          "member_jaccard": 0.6585365853658537,
+          "n_elites_a": 18,
+          "n_elites_b": 16,
+          "n_elites_shared": 13
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.5714285714285714,
+          "member_jaccard": 0.6829268292682927,
+          "n_elites_a": 18,
+          "n_elites_b": 15,
+          "n_elites_shared": 12
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.7222222222222222,
+          "member_jaccard": 0.8108108108108109,
+          "n_elites_a": 16,
+          "n_elites_b": 15,
+          "n_elites_shared": 13
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.5454545454545454,
+          "member_jaccard": 0.675,
+          "n_elites_a": 18,
+          "n_elites_b": 16,
+          "n_elites_shared": 12
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.6,
+          "member_jaccard": 0.8571428571428571,
+          "n_elites_a": 16,
+          "n_elites_b": 16,
+          "n_elites_shared": 12
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.55,
+          "member_jaccard": 0.8333333333333334,
+          "n_elites_a": 15,
+          "n_elites_b": 16,
+          "n_elites_shared": 11
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 75,
+          "n_admitted": 35,
+          "n_cells": 12,
+          "n_members": 35,
+          "n_elites": 18,
+          "cell_sizes": {
+            "exfiltration/authority": 6,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 4,
+            "hidden_injection/authority": 4,
+            "hidden_injection/markup": 2,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 4,
+            "override/authority": 5,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 2
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 75,
+          "n_admitted": 33,
+          "n_cells": 12,
+          "n_members": 33,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 3,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 3,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 4,
+            "override/authority": 6,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 4
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 75,
+          "n_admitted": 34,
+          "n_cells": 12,
+          "n_members": 34,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 3,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 4,
+            "override/authority": 5,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 5
+          }
+        },
+        "ORACLE": {
+          "n_seen": 75,
+          "n_admitted": 32,
+          "n_cells": 12,
+          "n_members": 32,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 2,
+            "exfiltration/technical": 3,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 2,
+            "hidden_injection/routine": 2,
+            "hidden_injection/technical": 4,
+            "override/authority": 6,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 4
+          }
+        }
+      }
+    },
+    {
+      "n": 100,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.6111111111111112,
+          "member_jaccard": 0.6792452830188679,
+          "n_elites_a": 16,
+          "n_elites_b": 13,
+          "n_elites_shared": 11
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.5789473684210527,
+          "member_jaccard": 0.7115384615384616,
+          "n_elites_a": 16,
+          "n_elites_b": 14,
+          "n_elites_shared": 11
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.6875,
+          "member_jaccard": 0.8297872340425532,
+          "n_elites_a": 13,
+          "n_elites_b": 14,
+          "n_elites_shared": 11
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.5,
+          "member_jaccard": 0.7058823529411765,
+          "n_elites_a": 16,
+          "n_elites_b": 14,
+          "n_elites_shared": 10
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.6875,
+          "member_jaccard": 0.8666666666666667,
+          "n_elites_a": 13,
+          "n_elites_b": 14,
+          "n_elites_shared": 11
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.5555555555555556,
+          "member_jaccard": 0.8666666666666667,
+          "n_elites_a": 14,
+          "n_elites_b": 14,
+          "n_elites_shared": 10
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 100,
+          "n_admitted": 46,
+          "n_cells": 12,
+          "n_members": 46,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 6,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 4,
+            "hidden_injection/authority": 5,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 3,
+            "hidden_injection/technical": 6,
+            "override/authority": 5,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 5
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 100,
+          "n_admitted": 43,
+          "n_cells": 12,
+          "n_members": 43,
+          "n_elites": 13,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 3,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 5,
+            "hidden_injection/routine": 3,
+            "hidden_injection/technical": 6,
+            "override/authority": 6,
+            "override/markup": 1,
+            "override/routine": 3,
+            "override/technical": 6
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 100,
+          "n_admitted": 43,
+          "n_cells": 12,
+          "n_members": 43,
+          "n_elites": 14,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 3,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 6,
+            "hidden_injection/routine": 3,
+            "hidden_injection/technical": 6,
+            "override/authority": 5,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 7
+          }
+        },
+        "ORACLE": {
+          "n_seen": 100,
+          "n_admitted": 41,
+          "n_cells": 12,
+          "n_members": 41,
+          "n_elites": 14,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 3,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 3,
+            "hidden_injection/technical": 6,
+            "override/authority": 6,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 6
+          }
+        }
+      }
+    },
+    {
+      "n": 125,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.4,
+          "member_jaccard": 0.6440677966101694,
+          "n_elites_a": 15,
+          "n_elites_b": 13,
+          "n_elites_shared": 8
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.4090909090909091,
+          "member_jaccard": 0.6896551724137931,
+          "n_elites_a": 15,
+          "n_elites_b": 16,
+          "n_elites_shared": 9
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.6111111111111112,
+          "member_jaccard": 0.8269230769230769,
+          "n_elites_a": 13,
+          "n_elites_b": 16,
+          "n_elites_shared": 11
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.36363636363636365,
+          "member_jaccard": 0.6964285714285714,
+          "n_elites_a": 15,
+          "n_elites_b": 15,
+          "n_elites_shared": 8
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.6470588235294118,
+          "member_jaccard": 0.84,
+          "n_elites_a": 13,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.55,
+          "member_jaccard": 0.86,
+          "n_elites_a": 16,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 125,
+          "n_admitted": 50,
+          "n_cells": 12,
+          "n_members": 50,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 6,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 5,
+            "hidden_injection/authority": 6,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 4,
+            "hidden_injection/technical": 7,
+            "override/authority": 5,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 5
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 125,
+          "n_admitted": 47,
+          "n_cells": 12,
+          "n_members": 47,
+          "n_elites": 13,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 5,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 5,
+            "hidden_injection/routine": 4,
+            "hidden_injection/technical": 6,
+            "override/authority": 6,
+            "override/markup": 1,
+            "override/routine": 3,
+            "override/technical": 6
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 125,
+          "n_admitted": 48,
+          "n_cells": 12,
+          "n_members": 48,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 5,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 6,
+            "hidden_injection/routine": 4,
+            "hidden_injection/technical": 7,
+            "override/authority": 5,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 7
+          }
+        },
+        "ORACLE": {
+          "n_seen": 125,
+          "n_admitted": 45,
+          "n_cells": 12,
+          "n_members": 45,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 5,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 4,
+            "hidden_injection/technical": 7,
+            "override/authority": 6,
+            "override/markup": 1,
+            "override/routine": 2,
+            "override/technical": 6
+          }
+        }
+      }
+    },
+    {
+      "n": 150,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.4090909090909091,
+          "member_jaccard": 0.6212121212121212,
+          "n_elites_a": 18,
+          "n_elites_b": 13,
+          "n_elites_shared": 9
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.43478260869565216,
+          "member_jaccard": 0.6417910447761194,
+          "n_elites_a": 18,
+          "n_elites_b": 15,
+          "n_elites_shared": 10
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.6470588235294118,
+          "member_jaccard": 0.7833333333333333,
+          "n_elites_a": 13,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.36,
+          "member_jaccard": 0.6666666666666666,
+          "n_elites_a": 18,
+          "n_elites_b": 16,
+          "n_elites_shared": 9
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.5263157894736842,
+          "member_jaccard": 0.8214285714285714,
+          "n_elites_a": 13,
+          "n_elites_b": 16,
+          "n_elites_shared": 10
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.47619047619047616,
+          "member_jaccard": 0.8103448275862069,
+          "n_elites_a": 15,
+          "n_elites_b": 16,
+          "n_elites_shared": 10
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 150,
+          "n_admitted": 55,
+          "n_cells": 12,
+          "n_members": 55,
+          "n_elites": 18,
+          "cell_sizes": {
+            "exfiltration/authority": 6,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 7,
+            "hidden_injection/markup": 5,
+            "hidden_injection/routine": 4,
+            "hidden_injection/technical": 7,
+            "override/authority": 5,
+            "override/markup": 2,
+            "override/routine": 2,
+            "override/technical": 6
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 150,
+          "n_admitted": 52,
+          "n_cells": 12,
+          "n_members": 52,
+          "n_elites": 13,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 5,
+            "hidden_injection/routine": 5,
+            "hidden_injection/technical": 6,
+            "override/authority": 6,
+            "override/markup": 2,
+            "override/routine": 3,
+            "override/technical": 8
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 150,
+          "n_admitted": 56,
+          "n_cells": 12,
+          "n_members": 55,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 7,
+            "hidden_injection/routine": 6,
+            "hidden_injection/technical": 7,
+            "override/authority": 5,
+            "override/markup": 2,
+            "override/routine": 3,
+            "override/technical": 8
+          }
+        },
+        "ORACLE": {
+          "n_seen": 150,
+          "n_admitted": 50,
+          "n_cells": 12,
+          "n_members": 50,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 4,
+            "hidden_injection/technical": 7,
+            "override/authority": 6,
+            "override/markup": 2,
+            "override/routine": 3,
+            "override/technical": 8
+          }
+        }
+      }
+    },
+    {
+      "n": 175,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.43478260869565216,
+          "member_jaccard": 0.6111111111111112,
+          "n_elites_a": 19,
+          "n_elites_b": 14,
+          "n_elites_shared": 10
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.4583333333333333,
+          "member_jaccard": 0.6301369863013698,
+          "n_elites_a": 19,
+          "n_elites_b": 16,
+          "n_elites_shared": 11
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.6666666666666666,
+          "member_jaccard": 0.8,
+          "n_elites_a": 14,
+          "n_elites_b": 16,
+          "n_elites_shared": 12
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.4166666666666667,
+          "member_jaccard": 0.6567164179104478,
+          "n_elites_a": 19,
+          "n_elites_b": 15,
+          "n_elites_shared": 10
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.6111111111111112,
+          "member_jaccard": 0.7868852459016393,
+          "n_elites_a": 14,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.55,
+          "member_jaccard": 0.7777777777777778,
+          "n_elites_a": 16,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 175,
+          "n_admitted": 59,
+          "n_cells": 12,
+          "n_members": 59,
+          "n_elites": 19,
+          "cell_sizes": {
+            "exfiltration/authority": 6,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 7,
+            "hidden_injection/markup": 6,
+            "hidden_injection/routine": 6,
+            "hidden_injection/technical": 7,
+            "override/authority": 5,
+            "override/markup": 3,
+            "override/routine": 2,
+            "override/technical": 6
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 175,
+          "n_admitted": 57,
+          "n_cells": 12,
+          "n_members": 57,
+          "n_elites": 14,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 2,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 5,
+            "hidden_injection/routine": 7,
+            "hidden_injection/technical": 6,
+            "override/authority": 6,
+            "override/markup": 3,
+            "override/routine": 4,
+            "override/technical": 8
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 175,
+          "n_admitted": 61,
+          "n_cells": 12,
+          "n_members": 60,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 2,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 7,
+            "hidden_injection/routine": 8,
+            "hidden_injection/technical": 7,
+            "override/authority": 5,
+            "override/markup": 3,
+            "override/routine": 4,
+            "override/technical": 8
+          }
+        },
+        "ORACLE": {
+          "n_seen": 175,
+          "n_admitted": 52,
+          "n_cells": 12,
+          "n_members": 52,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 5,
+            "hidden_injection/technical": 7,
+            "override/authority": 6,
+            "override/markup": 3,
+            "override/routine": 3,
+            "override/technical": 8
+          }
+        }
+      }
+    },
+    {
+      "n": 200,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.36,
+          "member_jaccard": 0.6025641025641025,
+          "n_elites_a": 20,
+          "n_elites_b": 14,
+          "n_elites_shared": 9
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.38461538461538464,
+          "member_jaccard": 0.6282051282051282,
+          "n_elites_a": 20,
+          "n_elites_b": 16,
+          "n_elites_shared": 10
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.6666666666666666,
+          "member_jaccard": 0.7971014492753623,
+          "n_elites_a": 14,
+          "n_elites_b": 16,
+          "n_elites_shared": 12
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.34615384615384615,
+          "member_jaccard": 0.6301369863013698,
+          "n_elites_a": 20,
+          "n_elites_b": 15,
+          "n_elites_shared": 9
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.6111111111111112,
+          "member_jaccard": 0.7575757575757576,
+          "n_elites_a": 14,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.55,
+          "member_jaccard": 0.7611940298507462,
+          "n_elites_a": 16,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 200,
+          "n_admitted": 65,
+          "n_cells": 12,
+          "n_members": 64,
+          "n_elites": 20,
+          "cell_sizes": {
+            "exfiltration/authority": 7,
+            "exfiltration/markup": 3,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 7,
+            "hidden_injection/markup": 6,
+            "hidden_injection/routine": 6,
+            "hidden_injection/technical": 8,
+            "override/authority": 5,
+            "override/markup": 4,
+            "override/routine": 2,
+            "override/technical": 6
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 200,
+          "n_admitted": 61,
+          "n_cells": 12,
+          "n_members": 61,
+          "n_elites": 14,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 3,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 5,
+            "hidden_injection/routine": 7,
+            "hidden_injection/technical": 8,
+            "override/authority": 6,
+            "override/markup": 4,
+            "override/routine": 4,
+            "override/technical": 8
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 200,
+          "n_admitted": 65,
+          "n_cells": 12,
+          "n_members": 63,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 3,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 7,
+            "hidden_injection/routine": 8,
+            "hidden_injection/technical": 8,
+            "override/authority": 5,
+            "override/markup": 4,
+            "override/routine": 4,
+            "override/technical": 8
+          }
+        },
+        "ORACLE": {
+          "n_seen": 200,
+          "n_admitted": 56,
+          "n_cells": 12,
+          "n_members": 55,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 2,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 4,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 5,
+            "hidden_injection/technical": 8,
+            "override/authority": 6,
+            "override/markup": 4,
+            "override/routine": 4,
+            "override/technical": 8
+          }
+        }
+      }
+    },
+    {
+      "n": 225,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.4166666666666667,
+          "member_jaccard": 0.6190476190476191,
+          "n_elites_a": 19,
+          "n_elites_b": 15,
+          "n_elites_shared": 10
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.4,
+          "member_jaccard": 0.6235294117647059,
+          "n_elites_a": 19,
+          "n_elites_b": 16,
+          "n_elites_shared": 10
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.7222222222222222,
+          "member_jaccard": 0.7866666666666666,
+          "n_elites_a": 15,
+          "n_elites_b": 16,
+          "n_elites_shared": 13
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.4,
+          "member_jaccard": 0.6455696202531646,
+          "n_elites_a": 19,
+          "n_elites_b": 16,
+          "n_elites_shared": 10
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.7222222222222222,
+          "member_jaccard": 0.7746478873239436,
+          "n_elites_a": 15,
+          "n_elites_b": 16,
+          "n_elites_shared": 13
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.6,
+          "member_jaccard": 0.7534246575342466,
+          "n_elites_a": 16,
+          "n_elites_b": 16,
+          "n_elites_shared": 12
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 225,
+          "n_admitted": 72,
+          "n_cells": 12,
+          "n_members": 70,
+          "n_elites": 19,
+          "cell_sizes": {
+            "exfiltration/authority": 8,
+            "exfiltration/markup": 3,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 8,
+            "hidden_injection/markup": 7,
+            "hidden_injection/routine": 6,
+            "hidden_injection/technical": 8,
+            "override/authority": 6,
+            "override/markup": 4,
+            "override/routine": 3,
+            "override/technical": 6
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 225,
+          "n_admitted": 66,
+          "n_cells": 12,
+          "n_members": 66,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 3,
+            "exfiltration/routine": 6,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 5,
+            "hidden_injection/routine": 7,
+            "hidden_injection/technical": 8,
+            "override/authority": 7,
+            "override/markup": 4,
+            "override/routine": 5,
+            "override/technical": 8
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 225,
+          "n_admitted": 70,
+          "n_cells": 12,
+          "n_members": 68,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 3,
+            "exfiltration/routine": 6,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 8,
+            "hidden_injection/routine": 8,
+            "hidden_injection/technical": 8,
+            "override/authority": 6,
+            "override/markup": 4,
+            "override/routine": 4,
+            "override/technical": 8
+          }
+        },
+        "ORACLE": {
+          "n_seen": 225,
+          "n_admitted": 61,
+          "n_cells": 12,
+          "n_members": 60,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 5,
+            "hidden_injection/technical": 8,
+            "override/authority": 7,
+            "override/markup": 4,
+            "override/routine": 5,
+            "override/technical": 8
+          }
+        }
+      }
+    },
+    {
+      "n": 250,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.4074074074074074,
+          "member_jaccard": 0.6,
+          "n_elites_a": 20,
+          "n_elites_b": 18,
+          "n_elites_shared": 11
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.4074074074074074,
+          "member_jaccard": 0.5934065934065934,
+          "n_elites_a": 20,
+          "n_elites_b": 18,
+          "n_elites_shared": 11
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.7142857142857143,
+          "member_jaccard": 0.7848101265822784,
+          "n_elites_a": 18,
+          "n_elites_b": 18,
+          "n_elites_shared": 15
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.4583333333333333,
+          "member_jaccard": 0.6309523809523809,
+          "n_elites_a": 20,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.7368421052631579,
+          "member_jaccard": 0.7733333333333333,
+          "n_elites_a": 18,
+          "n_elites_b": 15,
+          "n_elites_shared": 14
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.65,
+          "member_jaccard": 0.7402597402597403,
+          "n_elites_a": 18,
+          "n_elites_b": 15,
+          "n_elites_shared": 13
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 250,
+          "n_admitted": 76,
+          "n_cells": 12,
+          "n_members": 74,
+          "n_elites": 20,
+          "cell_sizes": {
+            "exfiltration/authority": 8,
+            "exfiltration/markup": 4,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 6,
+            "hidden_injection/authority": 8,
+            "hidden_injection/markup": 7,
+            "hidden_injection/routine": 6,
+            "hidden_injection/technical": 8,
+            "override/authority": 7,
+            "override/markup": 4,
+            "override/routine": 4,
+            "override/technical": 7
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 250,
+          "n_admitted": 70,
+          "n_cells": 12,
+          "n_members": 70,
+          "n_elites": 18,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 4,
+            "exfiltration/routine": 6,
+            "exfiltration/technical": 7,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 5,
+            "hidden_injection/routine": 7,
+            "hidden_injection/technical": 8,
+            "override/authority": 8,
+            "override/markup": 4,
+            "override/routine": 6,
+            "override/technical": 8
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 250,
+          "n_admitted": 73,
+          "n_cells": 12,
+          "n_members": 71,
+          "n_elites": 18,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 4,
+            "exfiltration/routine": 6,
+            "exfiltration/technical": 7,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 8,
+            "hidden_injection/routine": 8,
+            "hidden_injection/technical": 8,
+            "override/authority": 7,
+            "override/markup": 4,
+            "override/routine": 4,
+            "override/technical": 8
+          }
+        },
+        "ORACLE": {
+          "n_seen": 250,
+          "n_admitted": 64,
+          "n_cells": 12,
+          "n_members": 63,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 7,
+            "hidden_injection/authority": 3,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 5,
+            "hidden_injection/technical": 8,
+            "override/authority": 8,
+            "override/markup": 4,
+            "override/routine": 6,
+            "override/technical": 8
+          }
+        }
+      }
+    },
+    {
+      "n": 275,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.3793103448275862,
+          "member_jaccard": 0.5833333333333334,
+          "n_elites_a": 21,
+          "n_elites_b": 19,
+          "n_elites_shared": 11
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.4444444444444444,
+          "member_jaccard": 0.59375,
+          "n_elites_a": 21,
+          "n_elites_b": 18,
+          "n_elites_shared": 12
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.6818181818181818,
+          "member_jaccard": 0.7738095238095238,
+          "n_elites_a": 19,
+          "n_elites_b": 18,
+          "n_elites_shared": 15
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.44,
+          "member_jaccard": 0.6179775280898876,
+          "n_elites_a": 21,
+          "n_elites_b": 15,
+          "n_elites_shared": 11
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.7,
+          "member_jaccard": 0.7721518987341772,
+          "n_elites_a": 19,
+          "n_elites_b": 15,
+          "n_elites_shared": 14
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.65,
+          "member_jaccard": 0.7407407407407407,
+          "n_elites_a": 18,
+          "n_elites_b": 15,
+          "n_elites_shared": 13
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 275,
+          "n_admitted": 80,
+          "n_cells": 12,
+          "n_members": 78,
+          "n_elites": 21,
+          "cell_sizes": {
+            "exfiltration/authority": 8,
+            "exfiltration/markup": 5,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 7,
+            "hidden_injection/authority": 8,
+            "hidden_injection/markup": 7,
+            "hidden_injection/routine": 6,
+            "hidden_injection/technical": 8,
+            "override/authority": 7,
+            "override/markup": 5,
+            "override/routine": 5,
+            "override/technical": 7
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 275,
+          "n_admitted": 74,
+          "n_cells": 12,
+          "n_members": 74,
+          "n_elites": 19,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 4,
+            "exfiltration/routine": 6,
+            "exfiltration/technical": 8,
+            "hidden_injection/authority": 4,
+            "hidden_injection/markup": 6,
+            "hidden_injection/routine": 7,
+            "hidden_injection/technical": 8,
+            "override/authority": 8,
+            "override/markup": 5,
+            "override/routine": 6,
+            "override/technical": 8
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 275,
+          "n_admitted": 77,
+          "n_cells": 12,
+          "n_members": 75,
+          "n_elites": 18,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 4,
+            "exfiltration/routine": 6,
+            "exfiltration/technical": 8,
+            "hidden_injection/authority": 4,
+            "hidden_injection/markup": 8,
+            "hidden_injection/routine": 8,
+            "hidden_injection/technical": 8,
+            "override/authority": 7,
+            "override/markup": 5,
+            "override/routine": 5,
+            "override/technical": 8
+          }
+        },
+        "ORACLE": {
+          "n_seen": 275,
+          "n_admitted": 67,
+          "n_cells": 12,
+          "n_members": 66,
+          "n_elites": 15,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 1,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 8,
+            "hidden_injection/authority": 4,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 5,
+            "hidden_injection/technical": 8,
+            "override/authority": 8,
+            "override/markup": 5,
+            "override/routine": 6,
+            "override/technical": 8
+          }
+        }
+      }
+    },
+    {
+      "n": 300,
+      "overlap": {
+        "gpt-4o-mini|claude-sonnet-5": {
+          "elite_jaccard": 0.42857142857142855,
+          "member_jaccard": 0.5742574257425742,
+          "n_elites_a": 23,
+          "n_elites_b": 17,
+          "n_elites_shared": 12
+        },
+        "gpt-4o-mini|gpt-4o": {
+          "elite_jaccard": 0.41379310344827586,
+          "member_jaccard": 0.5643564356435643,
+          "n_elites_a": 23,
+          "n_elites_b": 18,
+          "n_elites_shared": 12
+        },
+        "claude-sonnet-5|gpt-4o": {
+          "elite_jaccard": 0.5217391304347826,
+          "member_jaccard": 0.7586206896551724,
+          "n_elites_a": 17,
+          "n_elites_b": 18,
+          "n_elites_shared": 12
+        },
+        "gpt-4o-mini|ORACLE": {
+          "elite_jaccard": 0.4444444444444444,
+          "member_jaccard": 0.5957446808510638,
+          "n_elites_a": 23,
+          "n_elites_b": 16,
+          "n_elites_shared": 12
+        },
+        "claude-sonnet-5|ORACLE": {
+          "elite_jaccard": 0.7368421052631579,
+          "member_jaccard": 0.7682926829268293,
+          "n_elites_a": 17,
+          "n_elites_b": 16,
+          "n_elites_shared": 14
+        },
+        "gpt-4o|ORACLE": {
+          "elite_jaccard": 0.6190476190476191,
+          "member_jaccard": 0.7349397590361446,
+          "n_elites_a": 18,
+          "n_elites_b": 16,
+          "n_elites_shared": 13
+        }
+      },
+      "archives": {
+        "gpt-4o-mini": {
+          "n_seen": 300,
+          "n_admitted": 84,
+          "n_cells": 12,
+          "n_members": 82,
+          "n_elites": 23,
+          "cell_sizes": {
+            "exfiltration/authority": 8,
+            "exfiltration/markup": 7,
+            "exfiltration/routine": 5,
+            "exfiltration/technical": 8,
+            "hidden_injection/authority": 8,
+            "hidden_injection/markup": 7,
+            "hidden_injection/routine": 6,
+            "hidden_injection/technical": 8,
+            "override/authority": 7,
+            "override/markup": 5,
+            "override/routine": 6,
+            "override/technical": 7
+          }
+        },
+        "claude-sonnet-5": {
+          "n_seen": 300,
+          "n_admitted": 77,
+          "n_cells": 12,
+          "n_members": 77,
+          "n_elites": 17,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 5,
+            "exfiltration/routine": 7,
+            "exfiltration/technical": 8,
+            "hidden_injection/authority": 4,
+            "hidden_injection/markup": 6,
+            "hidden_injection/routine": 7,
+            "hidden_injection/technical": 8,
+            "override/authority": 8,
+            "override/markup": 5,
+            "override/routine": 7,
+            "override/technical": 8
+          }
+        },
+        "gpt-4o": {
+          "n_seen": 300,
+          "n_admitted": 78,
+          "n_cells": 12,
+          "n_members": 76,
+          "n_elites": 18,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 4,
+            "exfiltration/routine": 7,
+            "exfiltration/technical": 8,
+            "hidden_injection/authority": 4,
+            "hidden_injection/markup": 8,
+            "hidden_injection/routine": 8,
+            "hidden_injection/technical": 8,
+            "override/authority": 7,
+            "override/markup": 5,
+            "override/routine": 5,
+            "override/technical": 8
+          }
+        },
+        "ORACLE": {
+          "n_seen": 300,
+          "n_admitted": 69,
+          "n_cells": 12,
+          "n_members": 68,
+          "n_elites": 16,
+          "cell_sizes": {
+            "exfiltration/authority": 4,
+            "exfiltration/markup": 2,
+            "exfiltration/routine": 6,
+            "exfiltration/technical": 8,
+            "hidden_injection/authority": 4,
+            "hidden_injection/markup": 4,
+            "hidden_injection/routine": 5,
+            "hidden_injection/technical": 8,
+            "override/authority": 8,
+            "override/markup": 5,
+            "override/routine": 6,
+            "override/technical": 8
+          }
+        }
+      }
+    }
+  ],
+  "final": {
+    "gpt-4o-mini": {
+      "n_seen": 300,
+      "n_admitted": 84,
+      "n_cells": 12,
+      "n_members": 82,
+      "n_elites": 23,
+      "cell_sizes": {
+        "exfiltration/authority": 8,
+        "exfiltration/markup": 7,
+        "exfiltration/routine": 5,
+        "exfiltration/technical": 8,
+        "hidden_injection/authority": 8,
+        "hidden_injection/markup": 7,
+        "hidden_injection/routine": 6,
+        "hidden_injection/technical": 8,
+        "override/authority": 7,
+        "override/markup": 5,
+        "override/routine": 6,
+        "override/technical": 7
+      }
+    },
+    "claude-sonnet-5": {
+      "n_seen": 300,
+      "n_admitted": 77,
+      "n_cells": 12,
+      "n_members": 77,
+      "n_elites": 17,
+      "cell_sizes": {
+        "exfiltration/authority": 4,
+        "exfiltration/markup": 5,
+        "exfiltration/routine": 7,
+        "exfiltration/technical": 8,
+        "hidden_injection/authority": 4,
+        "hidden_injection/markup": 6,
+        "hidden_injection/routine": 7,
+        "hidden_injection/technical": 8,
+        "override/authority": 8,
+        "override/markup": 5,
+        "override/routine": 7,
+        "override/technical": 8
+      }
+    },
+    "gpt-4o": {
+      "n_seen": 300,
+      "n_admitted": 78,
+      "n_cells": 12,
+      "n_members": 76,
+      "n_elites": 18,
+      "cell_sizes": {
+        "exfiltration/authority": 4,
+        "exfiltration/markup": 4,
+        "exfiltration/routine": 7,
+        "exfiltration/technical": 8,
+        "hidden_injection/authority": 4,
+        "hidden_injection/markup": 8,
+        "hidden_injection/routine": 8,
+        "hidden_injection/technical": 8,
+        "override/authority": 7,
+        "override/markup": 5,
+        "override/routine": 5,
+        "override/technical": 8
+      }
+    },
+    "ORACLE": {
+      "n_seen": 300,
+      "n_admitted": 69,
+      "n_cells": 12,
+      "n_members": 68,
+      "n_elites": 16,
+      "cell_sizes": {
+        "exfiltration/authority": 4,
+        "exfiltration/markup": 2,
+        "exfiltration/routine": 6,
+        "exfiltration/technical": 8,
+        "hidden_injection/authority": 4,
+        "hidden_injection/markup": 4,
+        "hidden_injection/routine": 5,
+        "hidden_injection/technical": 8,
+        "override/authority": 8,
+        "override/markup": 5,
+        "override/routine": 6,
+        "override/technical": 8
+      }
+    }
+  }
+}

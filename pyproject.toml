@@ -12,6 +12,11 @@ dependencies = [
     "langchain-openai>=0.2.0",
     "langchain-core>=0.3.0",
     "openai>=1.50.0",
+    # A judge panel has to cross providers to be worth running: one model
+    # family cannot distinguish "this judge is unreliable" from "this
+    # construct is hard". Used only by src/rubric_judge.py, which derives the
+    # provider from the model id.
+    "anthropic>=0.40.0",
     # ── Eval ─────────────────────────────────────────────────────────────────
     "inspect-ai>=0.3.50",
     # ── ML / Training ────────────────────────────────────────────────────────

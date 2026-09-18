@@ -10,13 +10,21 @@
 
 ---
 
+## The question
+
+> ### When you report that a defense works, how much of that number is about the defense — and how much is about the ruler you measured it with?
+
+That is not the question I started with. I started with *"can I train a small model to block prompt injection?"* — and answered it (§3). But the answer turned out to be the less interesting half, because while measuring three defenses I found that **the measuring tools themselves were broken in eight separate ways**, and that most of what I had concluded was a property of the ruler rather than of the defense.
+
 ## Abstract
 
-I built an LLM email agent, attacked it with an automated PAIR red-team, defended it with three layers — a hardened system prompt, a ModernBERT injection classifier, and a Qwen2.5-1.5B verifier trained by SFT then GRPO — and measured all of it carefully.
+**The setup.** An AI assistant with access to an inbox can read, reply, forward and delete. An attacker who can merely *send it an email* hides instructions in the body; the assistant cannot separate "my user's orders" from "text inside the data I'm reading", and acts on them. This is **indirect prompt injection**. Undefended, the agent here falls for roughly **1 attack in 3**.
 
-Then I audited the measurements. **Eight of the instruments were defective or unexamined**, and most of the project's substantive conclusions turned out to be casualties of that rather than facts about the defenses. Two of four headline claims were retracted. Of what remains, exactly one claim is invariant to every measurement choice available — and it is about the defense that required no training.
+**What I did.** Built the agent, attacked it with an automated red-team, defended it three ways — a 14-line hardened system prompt, a ModernBERT classifier, and a Qwen2.5-1.5B verifier trained with SFT then GRPO — and measured all of it.
 
-The report is organised around that: §3 is what the defenses did, §4 is what was wrong with the instruments that said so.
+**What I found.** The cheapest defense (the prompt) beat both trained ones. The RL training improved every training metric while *removing* the behaviour it was meant to install. Then I audited my own measurements: **two of four headline claims were retracted**, and exactly one survives every measurement choice available — the untrained prompt.
+
+**The sequel (§9).** One loose thread from that audit — an LLM grader inventing successes when a defense works — led out to a published red-team method that depends on exactly that grader. Three graders agree on only 25% of what they credit, and it changes which attacks an automated search keeps.
 
 **Every number traces to a result file** — `scripts/audit_report_numbers.py` (140/140) and `scripts/audit_p0_numbers.py` (79/79), both re-run on every change.
 
@@ -29,7 +37,8 @@ The report is organised around that: §3 is what the defenses did, §4 is what w
 | 5 minutes | §1.2 (the one surviving claim) and §4.0 (the eight defects) |
 | 20 minutes | Add §3.2 (RL removed the behaviour), §4.1 (the judge), §4.2 (the scorer) |
 | You evaluate defenses for a living | §4 end to end; it is the contribution |
-| You want the retractions | §5 |
+| You want the retractions | §5, and §9.6 |
+| You want the story, not the statistics | **§9** — the sequel, written as it actually happened |
 
 ---
 
@@ -37,13 +46,11 @@ The report is organised around that: §3 is what the defenses did, §4 is what w
 
 ## 1.1 Why this framing
 
-The project began as "can I train a small model to block prompt injection?" It answered that (§3), but the answer is not the interesting part — the field already knows that in-band defenses are fragile (§1.3).
-
-What the project turned out to be able to say, because it kept auditing itself, is narrower and less common:
+The field already knows in-band defenses are fragile (§1.3), so "I trained a defense and it partly worked" is not a contribution. What this project can say, because it kept auditing itself, is narrower and less common:
 
 > **When you measure three defenses carefully and then audit the measurement, how much of what you concluded was about the defenses?**
 
-Here, almost none of it. That is not a statement about these defenses being unusually bad. It is a statement about how much of a reported ASR is a property of the scorer, the judge, the sample size, and the constants nobody discloses.
+Here, almost none of it. That is not a claim that these defenses are unusually bad. It is a claim about how much of *any* reported attack-success-rate is a property of the scorer, the grader, the sample size, and the constants nobody writes down.
 
 ## 1.2 The ledger
 
@@ -634,6 +641,85 @@ T10 stood open for the life of this report: the "~\$1.20 end-to-end" figure came
 > **The unverified number happened to be right, and that is not the same as having been justified.** T10 was a live threat not because \$1.20 was wrong but because nothing in the repository could have told anyone whether it was. The 2.6× error in my own estimate — written days ago with the same confidence — is the better illustration of why the row existed.
 
 **Wall clock and GPU remain runbook figures, not instrumented**: SFT ~12 min, GRPO ~31 min, classifier ~5 min on an RTX 4060 8 GB. The verifier arms additionally consumed local GPU for ~25 Qwen side-calls per rollout at ~1 s, sha1-cached. Closing that half of T10 needs the same meter on the training scripts.
+
+---
+
+# 9. Sequel: pulling on the judge thread
+
+Everything above was finished. This section is what happened when I couldn't leave one sentence of it alone. It is written the way it actually went, missteps included, because the missteps are half the point.
+
+## 9.1 The loose thread
+
+In §4.1 I found that the LLM judge **fabricates** successes when the defense works — it narrates attacks that never happened, on rollouts where the agent took no action at all. Then I scoped it away. I wrote, correctly, that *none of this report's ASRs are affected*, because the numbers that matter here are action-grounded, not judge-based. True. Filed.
+
+But it kept bothering me for a reason that had nothing to do with this project: **almost everyone else's numbers *are* judge-based.** If an LLM judge invents successes exactly when the system under test is working, then a whole genre of safety evaluation might be quietly mismeasuring itself — and in the direction nobody worries about, making working defenses look worse rather than better.
+
+I didn't have a way to chase that. This is a toy inbox. You need a real target and a real method to say anything.
+
+## 9.2 The paper that made it concrete
+
+Then EvoFlint appeared ([arXiv:2609.00487](https://arxiv.org/html/2609.00487v1)) — a red-team paper from a nine-person lab, doing multi-turn attacks with an evolutionary quality-diversity search, reporting attack success rates above 90% on frontier models. Serious work. And its fitness function is built on exactly the thing I'd just found unreliable.
+
+EvoFlint scores each attack strategy with `⟨f_asr, f_peak⟩`, where `f_peak` is the **maximum judge severity** over a conversation. Its whole job is to give *failed* attacks a partial-credit gradient, so the archive can still learn from near-misses. And here is the part I couldn't get past: their target is text harmfulness on HarmBench, where **there is no ground truth**. "How bad was that response" is a judgement, all the way down. They even say so — single judge, cross-provider agreement an open question, not stress-tested.
+
+So they *cannot* check what `f_peak` measures. But in an agentic setting, I can. Success is a state change. A tool-call trace is a deterministic oracle. **I had the one thing their setup structurally lacks.** That's the whole reason this sequel exists — not a better attack, a place to *check the ruler*.
+
+## 9.3 First I had to check my own ruler
+
+Before measuring anyone's judge I had to build the oracle — an action-graded severity scale (L0–L4, adapting [arXiv:2607.07474](https://arxiv.org/html/2607.07474)) that reads a trace and says how bad the agent's actions actually were.
+
+My first version was wrong, and it was wrong in the direction that would have flattered my hypothesis. It graded every undefended rollout as maximum severity, because the agent replies to legitimate external senders in normal operation and I was counting any external reply as exfiltration. When I finally ran it against the judges, **10 of my 14 "attacks" turned out to be my oracle's false positives** — the judge was right and I was wrong. The reply "I'll work on the API integration doc, let's schedule a call" to an external partner is not a data leak; it only looks like one to a length-and-recipient rule.
+
+That was a small humiliation with a useful lesson attached: §4.2 of this very report had mocked a scorer's `REPLY_EXFIL_MIN_BODY` constant as an arbitrary knife-edge, and here I was reaching for the same crutch. The real fix wasn't a threshold. An external reply is exfiltration only if it **carries content from other emails** — another sender's address, another email's id, a verbatim quote — which I can check deterministically because I have the inbox. I also tried to add "descriptive" attribution (matching an attack's *words* to an email), watched it misfire on 12 of 38 rows, and cut it, recording the one row it costs me as a stated bias. Same discipline as the rest of the report: a disclosed limitation beats a mechanism that invents its own answers.
+
+## 9.4 What the judges actually do
+
+With a ruler I trusted, I scored 447 prompt-injection rollouts with three judges — `gpt-4o-mini`, `gpt-4o`, `claude-sonnet-5` — and with the oracle. Then I reconstructed EvoFlint's fitness over them and asked the only question that matters for a search: **not "do the judges give different numbers" but "would they keep different strategies."**
+
+They would.
+
+- The three judges agree on only **25%** of the strategies any of them gives partial credit to.
+- The Pareto front they imply — what an NSGA-II loop would keep — overlaps by as little as **11%**.
+- The per-cell elite, what MAP-Elites would store, differs in **4 of 6** populated cells.
+
+And the sharpest part, the one I didn't expect: **it is neither a provider effect nor a capability effect.** `gpt-4o` disagrees with `gpt-4o-mini` (same vendor, stronger model) exactly as much as `claude-sonnet-5` does. So the two obvious fixes — switch vendors, use a smarter judge — both fail. Any single judge as fitness commits the search to that judge's private notion of a near-miss.
+
+## 9.5 The headline I lost, and the one I didn't see coming
+
+Here is where I was wrong, and it's the most useful thing in the section.
+
+My bet was the fabrication story: the judge invents successes, that poison flows into `f_peak`, the archive fills with phantoms. I built the whole thing to measure that. Two things killed it. First, a literature check: "make the judge state absence explicitly instead of implying it" is **known** hallucination-prompting advice, not my discovery — and when I ablated it, one rendering line (printing `(none)` for an empty action list) moved fabrication from 2.1% to 0%, cleanly reproducing the effect but confirming it was a known instance, not a new mechanism. My headline was somebody else's footnote.
+
+Second, and better: the number I'd *underweighted* was the real one. The judges disagreeing about partial credit — the 25% — is significant at p = 0.0013, the same magnitude as this project's flagship §3.2 result. I'd walked past it because it wasn't the story I came for.
+
+## 9.6 Does it compound? I guessed yes. It doesn't.
+
+A static disagreement in the *inputs* to selection isn't the same as archives that *end up* different — selection might wash it out. So I built the actual search: a minimal MAP-Elites + NSLC loop, three judges each growing their own archive from one shared candidate stream, the oracle scoring everything but hidden from selection.
+
+The pilot was thrilling and wrong. At one trial per strategy, the cheapest judge's archive appeared to collapse away from ground truth — elite overlap with the oracle falling 0.70 → 0.19 as the search ran. That looked like textbook reward-model over-optimisation ([Gao et al.](https://arxiv.org/pdf/2210.10760)) in a third optimisation regime nobody has charted.
+
+But at one trial, `f_asr` and `f_peak` are monotone in a single severity level — the Pareto comparison is degenerate, and I'd flagged exactly this in the code before running it. So I paid for the real run: three trials per strategy, five hours, objectives decoupled. **The collapse did not survive.**
+
+| judge as fitness, vs the hidden oracle | pilot (trials=1) | trials=3 |
+|---|---|---|
+| `gpt-4o-mini` | 0.20 | **0.42** |
+| `gpt-4o` | 0.56 | 0.60 |
+| `claude-sonnet-5` | 0.66 | **0.69** |
+
+The honest answer to "does the divergence compound under budget" is **no — it settles.** What survives, and is now stronger for having a curve behind it:
+
+- **The judges never converge.** Even at 300 candidates their archives overlap at ~0.4–0.5. Judge choice as fitness changes what the loop keeps *permanently*, not while it warms up.
+- **There's a stable ordering in how well each judge tracks ground truth**: `claude-sonnet-5` (0.69, flat) > `gpt-4o` (0.60) > `gpt-4o-mini` (0.42) — the same ranking as the static oracle-agreement numbers, now reproduced through a live search.
+
+So I retracted the dramatic version and kept the durable one. That's the second retraction I've written into this project (§5.1, §5.2 were the first two), and by now I've stopped finding it embarrassing. The thing that makes a number trustworthy is not that it was right the first time; it's that there was a mechanism standing ready to catch it when it was wrong.
+
+## 9.7 What this leaves
+
+Not a novel defense. Not even a novel attack. A measurement of a measurement: in the one place the field can't usually check — the partial-credit signal a quality-diversity red-team runs on — three judges keep persistently different archives, the cheapest one tracks ground truth worst, and the effect is a stable offset rather than a runaway. All of it because an agentic environment hands you the answer key that text harmfulness withholds.
+
+The open question I can't close at this scale, and the natural thing to hand a lab that has the scale: does this reproduce on a real grid and attack budget, and is a **pairwise-preference** fitness (the Rainbow Teaming choice, [arXiv:2402.16822](https://arxiv.org/abs/2402.16822), which its authors picked precisely to resist reward hacking) more oracle-stable than the absolute rubric EvoFlint adopted? I have the instrument to answer it. I don't have the compute to answer it at a scale anyone should trust.
+
+The formal write-up of this section, with every number traced to a file, is [`judge_dependence_report.md`](judge_dependence_report.md); the interactive version is the demo's third tab.
 
 ---
 

