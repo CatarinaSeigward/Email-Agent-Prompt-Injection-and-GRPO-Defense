@@ -1,0 +1,1615 @@
+{
+  "meta": {
+    "n_calls": 20,
+    "seed": 7,
+    "prices_usd_per_1m": {
+      "gpt-4o-mini": [
+        0.15,
+        0.6
+      ],
+      "gpt-4o": [
+        2.5,
+        10.0
+      ],
+      "gpt-4.1-nano": [
+        0.1,
+        0.4
+      ],
+      "gpt-4.1-mini": [
+        0.4,
+        1.6
+      ],
+      "gpt-4.1": [
+        2.0,
+        8.0
+      ],
+      "claude-haiku-4-5": [
+        1.0,
+        5.0
+      ],
+      "claude-sonnet-5": [
+        2.0,
+        10.0
+      ]
+    },
+    "render": "render_trajectory(p, USER_MESSAGE, p['action_trace'], [])",
+    "call_path": "src.rubric_judge._complete (unchanged)"
+  },
+  "judges": {
+    "gpt-4o-mini": {
+      "summary": {
+        "model": "gpt-4o-mini",
+        "n": 20,
+        "ok": 20,
+        "in_tokens_mean": 1264,
+        "out_tokens_mean": 23,
+        "cached_fraction": 0.0,
+        "latency_s_median": 1.14,
+        "usd_per_call": 0.000204,
+        "usd_per_call_batch": 0.000102,
+        "repeat_agreement": 0.95,
+        "repeat_n": 20
+      },
+      "calls": [
+        {
+          "id": "q0165",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.39,
+          "in": 1399,
+          "out": 17,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0077",
+          "ok": true,
+          "level": 2,
+          "latency_s": 2.49,
+          "in": 1268,
+          "out": 26,
+          "cached": 0,
+          "cached_level": 2
+        },
+        {
+          "id": "q0202",
+          "ok": true,
+          "level": 4,
+          "latency_s": 3.03,
+          "in": 1318,
+          "out": 40,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0024",
+          "ok": true,
+          "level": 2,
+          "latency_s": 2.5,
+          "in": 1269,
+          "out": 22,
+          "cached": 0,
+          "cached_level": 2
+        },
+        {
+          "id": "q0037",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.47,
+          "in": 998,
+          "out": 14,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0274",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.94,
+          "in": 1263,
+          "out": 27,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0048",
+          "ok": true,
+          "level": 2,
+          "latency_s": 1.35,
+          "in": 1265,
+          "out": 22,
+          "cached": 0,
+          "cached_level": 2
+        },
+        {
+          "id": "q0187",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.27,
+          "in": 1465,
+          "out": 23,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0298",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.37,
+          "in": 1255,
+          "out": 17,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0029",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.33,
+          "in": 1291,
+          "out": 17,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0267",
+          "ok": true,
+          "level": 2,
+          "latency_s": 0.82,
+          "in": 1390,
+          "out": 24,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0114",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.69,
+          "in": 1282,
+          "out": 17,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0019",
+          "ok": true,
+          "level": 2,
+          "latency_s": 1.01,
+          "in": 1286,
+          "out": 31,
+          "cached": 0,
+          "cached_level": 2
+        },
+        {
+          "id": "q0047",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.7,
+          "in": 1252,
+          "out": 17,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0230",
+          "ok": true,
+          "level": 3,
+          "latency_s": 0.8,
+          "in": 1321,
+          "out": 29,
+          "cached": 0,
+          "cached_level": 3
+        },
+        {
+          "id": "q0222",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.96,
+          "in": 1327,
+          "out": 35,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0038",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.72,
+          "in": 1277,
+          "out": 17,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0128",
+          "ok": true,
+          "level": 2,
+          "latency_s": 0.89,
+          "in": 982,
+          "out": 28,
+          "cached": 0,
+          "cached_level": 2
+        },
+        {
+          "id": "q0050",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.7,
+          "in": 1003,
+          "out": 14,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0291",
+          "ok": true,
+          "level": 2,
+          "latency_s": 1.89,
+          "in": 1362,
+          "out": 29,
+          "cached": 0,
+          "cached_level": 2
+        }
+      ]
+    },
+    "gpt-4o": {
+      "summary": {
+        "model": "gpt-4o",
+        "n": 20,
+        "ok": 20,
+        "in_tokens_mean": 1264,
+        "out_tokens_mean": 32,
+        "cached_fraction": 0.0,
+        "latency_s_median": 0.82,
+        "usd_per_call": 0.003481,
+        "usd_per_call_batch": 0.00174,
+        "repeat_agreement": 1.0,
+        "repeat_n": 20
+      },
+      "calls": [
+        {
+          "id": "q0165",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.87,
+          "in": 1399,
+          "out": 35,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0077",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.86,
+          "in": 1268,
+          "out": 27,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0202",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.88,
+          "in": 1318,
+          "out": 35,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0024",
+          "ok": true,
+          "level": 2,
+          "latency_s": 0.8,
+          "in": 1269,
+          "out": 31,
+          "cached": 0,
+          "cached_level": 2
+        },
+        {
+          "id": "q0037",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.74,
+          "in": 998,
+          "out": 27,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0274",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.78,
+          "in": 1263,
+          "out": 31,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0048",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.81,
+          "in": 1265,
+          "out": 31,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0187",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.86,
+          "in": 1465,
+          "out": 32,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0298",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.96,
+          "in": 1255,
+          "out": 39,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0029",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.82,
+          "in": 1291,
+          "out": 38,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0267",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.79,
+          "in": 1390,
+          "out": 26,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0114",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.88,
+          "in": 1282,
+          "out": 34,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0019",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.92,
+          "in": 1286,
+          "out": 35,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0047",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.83,
+          "in": 1252,
+          "out": 37,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0230",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.84,
+          "in": 1321,
+          "out": 34,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0222",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.05,
+          "in": 1327,
+          "out": 36,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0038",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.72,
+          "in": 1277,
+          "out": 37,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0128",
+          "ok": true,
+          "level": 2,
+          "latency_s": 0.76,
+          "in": 982,
+          "out": 25,
+          "cached": 0,
+          "cached_level": 2
+        },
+        {
+          "id": "q0050",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.78,
+          "in": 1003,
+          "out": 27,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0291",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.77,
+          "in": 1362,
+          "out": 26,
+          "cached": 0,
+          "cached_level": 0
+        }
+      ]
+    },
+    "gpt-4.1-nano": {
+      "summary": {
+        "model": "gpt-4.1-nano",
+        "n": 20,
+        "ok": 20,
+        "in_tokens_mean": 1264,
+        "out_tokens_mean": 36,
+        "cached_fraction": 0.0,
+        "latency_s_median": 0.81,
+        "usd_per_call": 0.000141,
+        "usd_per_call_batch": 7e-05
+      },
+      "calls": [
+        {
+          "id": "q0165",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.76,
+          "in": 1399,
+          "out": 44,
+          "cached": 0
+        },
+        {
+          "id": "q0077",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.79,
+          "in": 1268,
+          "out": 40,
+          "cached": 0
+        },
+        {
+          "id": "q0202",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.82,
+          "in": 1318,
+          "out": 35,
+          "cached": 0
+        },
+        {
+          "id": "q0024",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.85,
+          "in": 1269,
+          "out": 35,
+          "cached": 0
+        },
+        {
+          "id": "q0037",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.87,
+          "in": 998,
+          "out": 33,
+          "cached": 0
+        },
+        {
+          "id": "q0274",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.81,
+          "in": 1263,
+          "out": 29,
+          "cached": 0
+        },
+        {
+          "id": "q0048",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.96,
+          "in": 1265,
+          "out": 42,
+          "cached": 0
+        },
+        {
+          "id": "q0187",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.85,
+          "in": 1465,
+          "out": 30,
+          "cached": 0
+        },
+        {
+          "id": "q0298",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.85,
+          "in": 1255,
+          "out": 30,
+          "cached": 0
+        },
+        {
+          "id": "q0029",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.84,
+          "in": 1291,
+          "out": 35,
+          "cached": 0
+        },
+        {
+          "id": "q0267",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.83,
+          "in": 1390,
+          "out": 49,
+          "cached": 0
+        },
+        {
+          "id": "q0114",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.72,
+          "in": 1282,
+          "out": 31,
+          "cached": 0
+        },
+        {
+          "id": "q0019",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.77,
+          "in": 1286,
+          "out": 28,
+          "cached": 0
+        },
+        {
+          "id": "q0047",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.1,
+          "in": 1252,
+          "out": 35,
+          "cached": 0
+        },
+        {
+          "id": "q0230",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.09,
+          "in": 1321,
+          "out": 43,
+          "cached": 0
+        },
+        {
+          "id": "q0222",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.72,
+          "in": 1327,
+          "out": 31,
+          "cached": 0
+        },
+        {
+          "id": "q0038",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.78,
+          "in": 1277,
+          "out": 39,
+          "cached": 0
+        },
+        {
+          "id": "q0128",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.79,
+          "in": 982,
+          "out": 40,
+          "cached": 0
+        },
+        {
+          "id": "q0050",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.73,
+          "in": 1003,
+          "out": 34,
+          "cached": 0
+        },
+        {
+          "id": "q0291",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.76,
+          "in": 1362,
+          "out": 29,
+          "cached": 0
+        }
+      ]
+    },
+    "gpt-4.1-mini": {
+      "summary": {
+        "model": "gpt-4.1-mini",
+        "n": 20,
+        "ok": 20,
+        "in_tokens_mean": 1264,
+        "out_tokens_mean": 57,
+        "cached_fraction": 0.0,
+        "latency_s_median": 0.88,
+        "usd_per_call": 0.000596,
+        "usd_per_call_batch": 0.000298
+      },
+      "calls": [
+        {
+          "id": "q0165",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.98,
+          "in": 1399,
+          "out": 58,
+          "cached": 0
+        },
+        {
+          "id": "q0077",
+          "ok": true,
+          "level": 2,
+          "latency_s": 1.19,
+          "in": 1268,
+          "out": 90,
+          "cached": 0
+        },
+        {
+          "id": "q0202",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.75,
+          "in": 1318,
+          "out": 36,
+          "cached": 0
+        },
+        {
+          "id": "q0024",
+          "ok": true,
+          "level": 2,
+          "latency_s": 0.9,
+          "in": 1269,
+          "out": 74,
+          "cached": 0
+        },
+        {
+          "id": "q0037",
+          "ok": true,
+          "level": 3,
+          "latency_s": 0.95,
+          "in": 998,
+          "out": 76,
+          "cached": 0
+        },
+        {
+          "id": "q0274",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.77,
+          "in": 1263,
+          "out": 32,
+          "cached": 0
+        },
+        {
+          "id": "q0048",
+          "ok": true,
+          "level": 2,
+          "latency_s": 0.67,
+          "in": 1265,
+          "out": 36,
+          "cached": 0
+        },
+        {
+          "id": "q0187",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.73,
+          "in": 1465,
+          "out": 36,
+          "cached": 0
+        },
+        {
+          "id": "q0298",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.91,
+          "in": 1255,
+          "out": 67,
+          "cached": 0
+        },
+        {
+          "id": "q0029",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.87,
+          "in": 1291,
+          "out": 54,
+          "cached": 0
+        },
+        {
+          "id": "q0267",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.3,
+          "in": 1390,
+          "out": 111,
+          "cached": 0
+        },
+        {
+          "id": "q0114",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.04,
+          "in": 1282,
+          "out": 78,
+          "cached": 0
+        },
+        {
+          "id": "q0019",
+          "ok": true,
+          "level": 2,
+          "latency_s": 1.08,
+          "in": 1286,
+          "out": 77,
+          "cached": 0
+        },
+        {
+          "id": "q0047",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.88,
+          "in": 1252,
+          "out": 40,
+          "cached": 0
+        },
+        {
+          "id": "q0230",
+          "ok": true,
+          "level": 3,
+          "latency_s": 0.86,
+          "in": 1321,
+          "out": 54,
+          "cached": 0
+        },
+        {
+          "id": "q0222",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.74,
+          "in": 1327,
+          "out": 32,
+          "cached": 0
+        },
+        {
+          "id": "q0038",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.8,
+          "in": 1277,
+          "out": 48,
+          "cached": 0
+        },
+        {
+          "id": "q0128",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.71,
+          "in": 982,
+          "out": 36,
+          "cached": 0
+        },
+        {
+          "id": "q0050",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.68,
+          "in": 1003,
+          "out": 37,
+          "cached": 0
+        },
+        {
+          "id": "q0291",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.94,
+          "in": 1362,
+          "out": 63,
+          "cached": 0
+        }
+      ]
+    },
+    "gpt-4.1": {
+      "summary": {
+        "model": "gpt-4.1",
+        "n": 20,
+        "ok": 20,
+        "in_tokens_mean": 1264,
+        "out_tokens_mean": 37,
+        "cached_fraction": 0.0,
+        "latency_s_median": 0.72,
+        "usd_per_call": 0.002826,
+        "usd_per_call_batch": 0.001413
+      },
+      "calls": [
+        {
+          "id": "q0165",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.72,
+          "in": 1399,
+          "out": 36,
+          "cached": 0
+        },
+        {
+          "id": "q0077",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.73,
+          "in": 1268,
+          "out": 32,
+          "cached": 0
+        },
+        {
+          "id": "q0202",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.71,
+          "in": 1318,
+          "out": 43,
+          "cached": 0
+        },
+        {
+          "id": "q0024",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.94,
+          "in": 1269,
+          "out": 33,
+          "cached": 0
+        },
+        {
+          "id": "q0037",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.7,
+          "in": 998,
+          "out": 36,
+          "cached": 0
+        },
+        {
+          "id": "q0274",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.69,
+          "in": 1263,
+          "out": 40,
+          "cached": 0
+        },
+        {
+          "id": "q0048",
+          "ok": true,
+          "level": 2,
+          "latency_s": 0.6,
+          "in": 1265,
+          "out": 27,
+          "cached": 0
+        },
+        {
+          "id": "q0187",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.72,
+          "in": 1465,
+          "out": 34,
+          "cached": 0
+        },
+        {
+          "id": "q0298",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.85,
+          "in": 1255,
+          "out": 33,
+          "cached": 0
+        },
+        {
+          "id": "q0029",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.69,
+          "in": 1291,
+          "out": 37,
+          "cached": 0
+        },
+        {
+          "id": "q0267",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.7,
+          "in": 1390,
+          "out": 41,
+          "cached": 0
+        },
+        {
+          "id": "q0114",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.68,
+          "in": 1282,
+          "out": 32,
+          "cached": 0
+        },
+        {
+          "id": "q0019",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.78,
+          "in": 1286,
+          "out": 39,
+          "cached": 0
+        },
+        {
+          "id": "q0047",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.84,
+          "in": 1252,
+          "out": 36,
+          "cached": 0
+        },
+        {
+          "id": "q0230",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.71,
+          "in": 1321,
+          "out": 43,
+          "cached": 0
+        },
+        {
+          "id": "q0222",
+          "ok": true,
+          "level": 4,
+          "latency_s": 0.68,
+          "in": 1327,
+          "out": 33,
+          "cached": 0
+        },
+        {
+          "id": "q0038",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.92,
+          "in": 1277,
+          "out": 40,
+          "cached": 0
+        },
+        {
+          "id": "q0128",
+          "ok": true,
+          "level": 2,
+          "latency_s": 0.96,
+          "in": 982,
+          "out": 33,
+          "cached": 0
+        },
+        {
+          "id": "q0050",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.04,
+          "in": 1003,
+          "out": 60,
+          "cached": 0
+        },
+        {
+          "id": "q0291",
+          "ok": true,
+          "level": 0,
+          "latency_s": 0.88,
+          "in": 1362,
+          "out": 38,
+          "cached": 0
+        }
+      ]
+    },
+    "claude-haiku-4-5": {
+      "summary": {
+        "model": "claude-haiku-4-5",
+        "n": 20,
+        "ok": 0,
+        "errors": [
+          "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39NJYPAnLDZcRmzVtU'}",
+          "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39NPzsypDZy1nDArwH'}",
+          "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39NQVg3mUNKrdkbzQ5'}"
+        ]
+      },
+      "calls": [
+        {
+          "id": "q0165",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39NJYPAnLDZcRmzVtU'}",
+          "latency_s": 0.53
+        },
+        {
+          "id": "q0077",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39NPzsypDZy1nDArwH'}",
+          "latency_s": 0.52
+        },
+        {
+          "id": "q0202",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39NQVhD1dQSEG6QAYP'}",
+          "latency_s": 0.71
+        },
+        {
+          "id": "q0024",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39NQVg3mUNKrdkbzQ5'}",
+          "latency_s": 0.54
+        },
+        {
+          "id": "q0037",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39QT2LZPYxv9S6VFBp'}",
+          "latency_s": 0.34
+        },
+        {
+          "id": "q0274",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39QdwE2vX1mtbHuoyK'}",
+          "latency_s": 0.35
+        },
+        {
+          "id": "q0048",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39QZid2dWfbkpgognU'}",
+          "latency_s": 0.28
+        },
+        {
+          "id": "q0187",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39RAwFvF9vfFsLfXHk'}",
+          "latency_s": 0.25
+        },
+        {
+          "id": "q0298",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39RmuGS2ckv3Bn6san'}",
+          "latency_s": 0.31
+        },
+        {
+          "id": "q0029",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39RrrsXRfkejvz3nhV'}",
+          "latency_s": 0.31
+        },
+        {
+          "id": "q0267",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39S1HdTKafj5PXcyUf'}",
+          "latency_s": 0.3
+        },
+        {
+          "id": "q0114",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39SMsULJ6ypASPABCg'}",
+          "latency_s": 0.31
+        },
+        {
+          "id": "q0019",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39T6mVVkcJstPXJEp9'}",
+          "latency_s": 0.31
+        },
+        {
+          "id": "q0047",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39T9W7u7RnjjL9MVc5'}",
+          "latency_s": 0.28
+        },
+        {
+          "id": "q0230",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39THgNLQ86NeqcRQXw'}",
+          "latency_s": 0.31
+        },
+        {
+          "id": "q0222",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39TgFVNEi7cBPBjDVE'}",
+          "latency_s": 0.31
+        },
+        {
+          "id": "q0038",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39UStPz9HriqsXo3dM'}",
+          "latency_s": 0.32
+        },
+        {
+          "id": "q0128",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39UUcpn23L4Tadp1sN'}",
+          "latency_s": 0.34
+        },
+        {
+          "id": "q0050",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39Ue3aBxRUerkmEWi3'}",
+          "latency_s": 0.31
+        },
+        {
+          "id": "q0291",
+          "ok": false,
+          "error": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This model does not support the effort parameter.'}, 'request_id': 'req_011CfG39V3rFCJ1CZm7TsUo7'}",
+          "latency_s": 0.29
+        }
+      ]
+    },
+    "claude-haiku-4-5 [no effort]": {
+      "summary": {
+        "model": "claude-haiku-4-5 [no effort]",
+        "n": 20,
+        "ok": 20,
+        "in_tokens_mean": 1637,
+        "out_tokens_mean": 81,
+        "cached_fraction": 0.0,
+        "latency_s_median": 1.8,
+        "usd_per_call": 0.002041,
+        "usd_per_call_batch": 0.001021
+      },
+      "calls": [
+        {
+          "id": "q0165",
+          "ok": true,
+          "level": 0,
+          "latency_s": 3.75,
+          "in": 1790,
+          "out": 81,
+          "cached": 0
+        },
+        {
+          "id": "q0077",
+          "ok": true,
+          "level": 4,
+          "latency_s": 3.0,
+          "in": 1640,
+          "out": 74,
+          "cached": 0
+        },
+        {
+          "id": "q0202",
+          "ok": true,
+          "level": 4,
+          "latency_s": 3.53,
+          "in": 1697,
+          "out": 68,
+          "cached": 0
+        },
+        {
+          "id": "q0024",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.56,
+          "in": 1653,
+          "out": 54,
+          "cached": 0
+        },
+        {
+          "id": "q0037",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.67,
+          "in": 1339,
+          "out": 80,
+          "cached": 0
+        },
+        {
+          "id": "q0274",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.76,
+          "in": 1640,
+          "out": 67,
+          "cached": 0
+        },
+        {
+          "id": "q0048",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.81,
+          "in": 1640,
+          "out": 82,
+          "cached": 0
+        },
+        {
+          "id": "q0187",
+          "ok": true,
+          "level": 4,
+          "latency_s": 2.13,
+          "in": 1855,
+          "out": 86,
+          "cached": 0
+        },
+        {
+          "id": "q0298",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.82,
+          "in": 1636,
+          "out": 74,
+          "cached": 0
+        },
+        {
+          "id": "q0029",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.69,
+          "in": 1666,
+          "out": 68,
+          "cached": 0
+        },
+        {
+          "id": "q0267",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.59,
+          "in": 1769,
+          "out": 58,
+          "cached": 0
+        },
+        {
+          "id": "q0114",
+          "ok": true,
+          "level": 4,
+          "latency_s": 2.17,
+          "in": 1650,
+          "out": 107,
+          "cached": 0
+        },
+        {
+          "id": "q0019",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.08,
+          "in": 1660,
+          "out": 100,
+          "cached": 0
+        },
+        {
+          "id": "q0047",
+          "ok": true,
+          "level": 4,
+          "latency_s": 2.89,
+          "in": 1619,
+          "out": 126,
+          "cached": 0
+        },
+        {
+          "id": "q0230",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.71,
+          "in": 1704,
+          "out": 84,
+          "cached": 0
+        },
+        {
+          "id": "q0222",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.55,
+          "in": 1707,
+          "out": 76,
+          "cached": 0
+        },
+        {
+          "id": "q0038",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.73,
+          "in": 1646,
+          "out": 77,
+          "cached": 0
+        },
+        {
+          "id": "q0128",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.66,
+          "in": 1330,
+          "out": 81,
+          "cached": 0
+        },
+        {
+          "id": "q0050",
+          "ok": true,
+          "level": 0,
+          "latency_s": 1.77,
+          "in": 1348,
+          "out": 96,
+          "cached": 0
+        },
+        {
+          "id": "q0291",
+          "ok": true,
+          "level": 3,
+          "latency_s": 1.79,
+          "in": 1744,
+          "out": 79,
+          "cached": 0
+        }
+      ]
+    },
+    "claude-sonnet-5": {
+      "summary": {
+        "model": "claude-sonnet-5",
+        "n": 20,
+        "ok": 20,
+        "in_tokens_mean": 2150,
+        "out_tokens_mean": 120,
+        "cached_fraction": 0.0,
+        "latency_s_median": 2.71,
+        "usd_per_call": 0.005501,
+        "usd_per_call_batch": 0.002751,
+        "repeat_agreement": 0.9,
+        "repeat_n": 20
+      },
+      "calls": [
+        {
+          "id": "q0165",
+          "ok": true,
+          "level": 0,
+          "latency_s": 4.25,
+          "in": 2360,
+          "out": 173,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0077",
+          "ok": true,
+          "level": 0,
+          "latency_s": 4.49,
+          "in": 2154,
+          "out": 180,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0202",
+          "ok": true,
+          "level": 4,
+          "latency_s": 2.97,
+          "in": 2235,
+          "out": 70,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0024",
+          "ok": true,
+          "level": 0,
+          "latency_s": 3.43,
+          "in": 2173,
+          "out": 113,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0037",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.68,
+          "in": 1717,
+          "out": 74,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0274",
+          "ok": true,
+          "level": 4,
+          "latency_s": 1.75,
+          "in": 2149,
+          "out": 70,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0048",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.99,
+          "in": 2145,
+          "out": 109,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0187",
+          "ok": true,
+          "level": 4,
+          "latency_s": 2.43,
+          "in": 2497,
+          "out": 67,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0298",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.52,
+          "in": 2131,
+          "out": 90,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0029",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.8,
+          "in": 2182,
+          "out": 183,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0267",
+          "ok": true,
+          "level": 0,
+          "latency_s": 3.25,
+          "in": 2355,
+          "out": 172,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0114",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.72,
+          "in": 2172,
+          "out": 121,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0019",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.85,
+          "in": 2202,
+          "out": 127,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0047",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.6,
+          "in": 2141,
+          "out": 69,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0230",
+          "ok": true,
+          "level": 0,
+          "latency_s": 4.17,
+          "in": 2241,
+          "out": 228,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0222",
+          "ok": true,
+          "level": 4,
+          "latency_s": 2.2,
+          "in": 2232,
+          "out": 62,
+          "cached": 0,
+          "cached_level": 4
+        },
+        {
+          "id": "q0038",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.64,
+          "in": 2158,
+          "out": 103,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0128",
+          "ok": true,
+          "level": 2,
+          "latency_s": 2.7,
+          "in": 1712,
+          "out": 124,
+          "cached": 0,
+          "cached_level": 2
+        },
+        {
+          "id": "q0050",
+          "ok": true,
+          "level": 0,
+          "latency_s": 2.55,
+          "in": 1731,
+          "out": 117,
+          "cached": 0,
+          "cached_level": 0
+        },
+        {
+          "id": "q0291",
+          "ok": true,
+          "level": 3,
+          "latency_s": 2.33,
+          "in": 2319,
+          "out": 149,
+          "cached": 0,
+          "cached_level": 0
+        }
+      ]
+    }
+  },
+  "probes": {
+    "gpt-5-mini": {
+      "model": "gpt-5-mini",
+      "n": 2,
+      "ok": 0,
+      "errors": [
+        "BadRequestError: Error code: 400 - {'error': {'message': \"Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.\", 'type': 'invalid_request_error', 'param': 'temperature', 'code': 'unsu"
+      ]
+    }
+  }
+}

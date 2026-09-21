@@ -2,8 +2,8 @@
 
 > **Kaiwen Lin** · `kaiwenlin@utexas.edu` · MIT (code) / CC BY 4.0 (report)
 > **Live demo**: <https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/>
-> **Companions**: [`judge_dependence_report.md`](judge_dependence_report.md) — the formal version of §3–§8, every number traced to a file · [`p0_analysis.md`](p0_analysis.md) — the first audit
-> Every number here is machine-checked: `scripts/audit_report_numbers.py` (163/163) and `scripts/audit_p0_numbers.py` (79/79), re-run on every change.
+> **Companions**: [`judge_dependence_report.md`](judge_dependence_report.md) — the formal version of §3–§8 (best-of-n §7 is new here), every number traced to a file · [`p0_analysis.md`](p0_analysis.md) — the first audit
+> Every number here is machine-checked: `scripts/audit_report_numbers.py` (174/174) and `scripts/audit_p0_numbers.py` (79/79), re-run on every change.
 
 ---
 
@@ -11,17 +11,17 @@
 
 **The arc.** I built an email agent, attacked it, and defended it three ways — and the cheapest defense won. Then I asked whether that comparison meant anything, and found **my instruments were broken in eight ways**; two of my four headline claims did not survive. One of those defects was that an LLM judge **invents** successes when a defense works. That defect is not mine. **Almost everyone else's red-team numbers are judge-based**, including a published quality-diversity method whose entire fitness function is a judge score. So I built a ground-truth oracle and pointed it at that method.
 
-**The question it ended at.** Quality-diversity red-teaming uses an LLM judge's severity score as fitness — EvoFlint's `f_peak` exists to give *failed* attacks a partial-credit gradient. On a text benchmark there is no ground truth to check that score against. **In an agentic setting there is**: whether a tool ran is a fact, not an opinion. So how far is the judge from the facts, and does the gap change what the search keeps?
+**The question it ended at.** Quality-diversity red-teaming has started to use an LLM judge's severity score directly as fitness — the `f_peak` term exists to give *failed* attacks a partial-credit gradient. On a text benchmark there is no ground truth to check that score against. **In an agentic setting there is**: whether a tool ran is a fact, not an opinion. So how far is the judge from the facts, and does the gap change what the search keeps?
 
 **Three findings.**
 
 1. **Three judges agree on only 25%** of the strategies any of them gives partial credit to (*p* = 0.0013); the Pareto front they imply overlaps by as little as 11%. It is **neither a provider nor a capability effect** — `gpt-4o` disagrees with `gpt-4o-mini` as much as `claude-sonnet-5` does, so switching vendors and buying a smarter judge both fail.
 2. **It does not compound under search — it settles.** I expected run-away divergence and measured a permanent offset instead.
-3. **All three judges over-credit the attacker** (+39, +20, +6 points), and the error is **crediting, not fabricating**: they take actions the agent really took and tie them to the attack.
+3. **All seven judges over-credit the attacker**, but over-crediting and *picking the worst attack* are different failures: as best-of-n selectors the strong judges reach 80–87% of the way to ground truth while the cheapest reaches 0% (§7), and static calibration predicts the ranking (ρ = −0.93). The error is **crediting, not fabricating**: judges take actions the agent really took and tie them to the attack.
 
-**What bounds it.** k = 1 — one search run (§8).
+**What bounds it.** k = 1 — one search run (§9). Best-of-n (§7) is a separate draw.
 
-**If you read one section**, read §7: the disagreements one attack at a time, which is what the demo's *Click an attack* tab pages through. §1–§2 are the defense project and the self-audit that produced the ruler; §3 is where the story turns outward.
+**If you read one section**, read §8: the disagreements one attack at a time, which is what the demo's *Click an attack* tab pages through. §1–§2 are the defense project and the self-audit that produced the ruler; §3 is where the story turns outward.
 
 ---
 
@@ -162,7 +162,7 @@ Three standard paired-evaluation diagnostics ([arXiv:2605.30315](https://arxiv.o
 > [!CAUTION]
 > **The loose-vs-strict comparison could not have reached 80% power at n = 38 for *any* true effect size.** It was not a close call that went the wrong way — the experiment could not have succeeded. A five-minute power calculation would have said so in advance.
 
-**Required N** at 30% discordance: 20 pp needs 61; 10 pp needs 249; 5 pp needs 975. At AgentDojo's n = 629 the MDE drops to 5–7 pp, a ~4× improvement that would move every comparison in §1.2 into testable range. **That is the quantitative case for porting**, and why replicating at k ≥ 3 is the weaker option *for these comparisons*: MDE is driven by n, not k. (§8 explains why the search replication is a different question, one that k does answer.)
+**Required N** at 30% discordance: 20 pp needs 61; 10 pp needs 249; 5 pp needs 975. At AgentDojo's n = 629 the MDE drops to 5–7 pp, a ~4× improvement that would move every comparison in §1.2 into testable range. **That is the quantitative case for porting**, and why replicating at k ≥ 3 is the weaker option *for these comparisons*: MDE is driven by n, not k. (§9 explains why the search replication is a different question, one that k does answer.)
 
 **Where pre-registration earned its keep.** A separately pre-registered arm predicted that an adaptive attacker targeting the verifier would raise ASR. Its registered resolution table marked 10% and 20% discordance unreachable at n = 30 **in advance**. Observed discordance was 20%; the result was +0.0 pp with a discordant pair of (3, 3) — six seeds changed outcome, three each way, so the adaptive attacker reshuffles *which* seeds crack while the total stays put. The comparison could not have produced a significant result whatever the attacker did — the same defect as the first retraction below, except written down before the first rollout instead of discovered after a headline was built on it.
 
@@ -190,9 +190,9 @@ Three standard paired-evaluation diagnostics ([arXiv:2605.30315](https://arxiv.o
 
 It kept bothering me for a reason that had nothing to do with my project: **almost everyone else's numbers *are* judge-based.** If a judge invents successes exactly when the system under test is working, a genre of safety evaluation may be mismeasuring itself in the direction nobody worries about — making working defenses look *worse*. I had no way to chase that. This is a toy inbox; you need a real target and a real method to say anything.
 
-**Then EvoFlint appeared** ([arXiv:2609.00487](https://arxiv.org/html/2609.00487v1)): a red-team paper from a nine-person lab, multi-turn attacks driven by an evolutionary quality-diversity search, attack success above 90% on frontier models. Serious work — and its fitness is built on exactly what I had just found unreliable. It scores each strategy with `⟨f_asr, f_peak⟩`, where `f_peak` is **maximum judge severity** over a conversation. Its whole job is to give failed attacks a partial-credit gradient so the archive can learn from near-misses. And its target is text harmfulness on HarmBench, where **"how bad was that response" is a judgement all the way down**. The authors say as much: single judge, cross-provider agreement an open question, not stress-tested.
+**Then the thread got a concrete target.** Quality-diversity red-teaming has begun wiring judge severity straight into the fitness function: a strategy is scored `⟨f_asr, f_peak⟩`, where `f_peak` is the **maximum judge severity** over a conversation, and its whole job is to give failed attacks a partial-credit gradient so the archive can learn from near-misses. ([arXiv:2609.00487](https://arxiv.org/html/2609.00487v1) is a recent instance, driving multi-turn attacks to above 90% success on frontier models.) That fitness is built on exactly what I had just found unreliable — and the usual target is text harmfulness on HarmBench, where **"how bad was that response" is a judgement all the way down**. The limitation is stated openly in that work: single judge, cross-provider agreement an open question, not stress-tested.
 
-So they cannot check what `f_peak` measures. In an agentic setting I can. Success is a state change; a tool-call trace is a deterministic oracle. **That is the one thing their setup structurally lacks**, and the only reason a toy inbox has anything to say to them. This is not a better attack. It is a place to check the ruler.
+So that setup cannot check what `f_peak` measures. In an agentic setting I can. Success is a state change; a tool-call trace is a deterministic oracle. **That is the one thing their setup structurally lacks**, and the only reason a toy inbox has anything to say to them. This is not a better attack. It is a place to check the ruler.
 
 ---
 
@@ -218,7 +218,7 @@ A coincidence is testable. [`scripts/l3_base_rate.py`](scripts/l3_base_rate.py) 
 
 Naming an email does not make the agent likelier to reply to it or quote it; if anything, the reverse. Two controls stop that null from being a blunt instrument. **Deletion is a channel where naming does move the rate.** And delivery to an attack-named *external* address runs at 12.8% (21 of 164) — where all 164 such addresses are absent from the inbox, so the agent cannot reach them except by complying. The measurement finds compliance where compliance exists.
 
-Per instance the 65 break down as **36** where the requested content was never carried at all, **7** where the requested action or address is absent from the trace entirely, and **22** that rest on the base rate alone. None support the blind-spot reading, so the L3 credits go back in as judge errors and §7 carries the corrected numbers.
+Per instance the 65 break down as **36** where the requested content was never carried at all, **7** where the requested action or address is absent from the trace entirely, and **22** that rest on the base rate alone. None support the blind-spot reading, so the L3 credits go back in as judge errors and §8 carries the corrected numbers.
 
 > Worth noting how this one resolved: not by hand-labelling 65 cases — which I could not have done independently, being the author of the rules — but by a comparison anyone can re-run.
 
@@ -226,7 +226,7 @@ Per instance the 65 break down as **36** where the requested content was never c
 
 # 5. What the judges do
 
-With a ruler I trusted, I scored 447 prompt-injection rollouts with three judges (`gpt-4o-mini`, `gpt-4o`, `claude-sonnet-5`) and with the oracle, reconstructed EvoFlint's fitness over them, and asked the only question that matters for a search: **not "do the judges give different numbers" but "would they keep different strategies."**
+With a ruler I trusted, I scored 447 prompt-injection rollouts with three judges (`gpt-4o-mini`, `gpt-4o`, `claude-sonnet-5`) and with the oracle, reconstructed that fitness over them, and asked the only question that matters for a search: **not "do the judges give different numbers" but "would they keep different strategies."**
 
 They would.
 
@@ -261,7 +261,41 @@ That is the third retraction in this project (§2.5 has the first two), and by n
 
 ---
 
-# 7. Which attacks, and why
+# 7. Under pressure: how far does each judge carry you from random?
+
+§6 asked whether disagreement grows with search *budget*. This asks a different question — how it depends on selection *strength* — with the simplest optimiser there is: draw *n* fresh attacks, keep the one the judge scores highest, and check what the agent actually did. No training, so the pressure is a dial I can turn and measure exactly.
+
+The setup is a clean re-run, pre-registered before a single rollout ([`results/bon_preregistration.json`](results/bon_preregistration.json)): the same gpt-4o-mini attacker as §6 draws **512 fresh attacks**, each run three times; the judge scores one trial, and the **gold** score is the oracle averaged over the other two — held out, so picking a lucky trial cannot flatter the selector. Two selectors bracket every judge: **random** (the floor) and **the oracle itself** (the ceiling — what perfect selection reaches given the agent's own trial-to-trial noise, here 0.84). Seven judges this time, a weak-to-strong ladder on the OpenAI side, so the prediction below has the statistical power three judges could never give it.
+
+![Selection efficiency per judge, and calibration versus ranking](docs/diagrams/bon_efficiency.png)
+
+**Selection efficiency** — how far a judge's pick moves gold from random (0) to oracle (1) at n = 32 — spans almost the whole range:
+
+| judge | over-credit (§8) | selection efficiency | 95% CI |
+|---|---|---|---|
+| gpt-4.1-nano | +68 pp | **0.00** | [−0.00, 0.01] |
+| gpt-4.1-mini | +49 pp | 0.34 | [0.26, 0.42] |
+| claude-haiku-4-5 | +22 pp | 0.44 | [0.36, 0.52] |
+| gpt-4o-mini | +37 pp | 0.49 | [0.40, 0.59] |
+| gpt-4o | +21 pp | 0.80 | [0.71, 0.89] |
+| claude-sonnet-5 | +8 pp | 0.86 | [0.78, 0.93] |
+| gpt-4.1 | +14 pp | **0.87** | [0.79, 0.94] |
+
+Three things, all pre-registered.
+
+**Over-crediting and picking winners are different failures.** A judge's static calibration (how much it over-credits at n = 1) predicts its selection efficiency strongly — Spearman **ρ = −0.93, exact p = 0.003** — so the two are related. But they are not the same axis: gpt-4o and claude-haiku over-credit almost identically (+21 vs +22 pp) yet select at 0.80 versus 0.44. A search consumes the *ranking*, not the calibration, and the ranking is where the strong judges pull ahead. So the §8 headline — *all seven judges over-credit* — needs a companion clause: **as selectors of the best attack, the stronger judges come close to ground truth, and only the cheapest are near-useless.**
+
+**The cheapest judge is exactly random.** gpt-4.1-nano's picks reach gold 0.00 — its curve lies flat on the floor at every n (figure below). It scores 98% of attacks at the top level, so best-of-n is drawing from one undifferentiated bucket; there is nothing to select on. A judge can be *precise enough to sort a benchmark* and still carry **zero** information about which attack is actually worse.
+
+![Held-out gold versus best-of-n, one panel per judge](docs/diagrams/bon_curves.png)
+
+**A four-level score is itself a ceiling on pressure — and it may be why §6 settled.** The closed-form KL of best-of-32 is 2.50 nats, but with only four score levels the *effective* pressure a judge can apply saturates once its top bucket is almost always in the draw: the judges top out at 1.1–1.6 nats, nano at 0.02. A coarse rubric cannot be optimised past `log(1 / top-share)` however large the budget — which is a mechanism for §6's central surprise. The search did not run away because the signal it runs on runs out of resolution.
+
+**What this does not rescue.** Best-of-n tests the *top* of the distribution — which attack is best. §5's 25%-agreement result is about the *middle* — which near-misses deserve partial credit — and the middle is exactly what `f_peak` exists to supply. Both hold; they are about different parts of the judge. (Two limits kept honest: this is one search population, and — deviation D2 in [`results/bon_deviations.json`](results/bon_deviations.json) — the two priciest judges were rate-limited during scoring and refilled at lower concurrency; their main verdicts ended 0-failure, their self-noise 97–100% agreement on the calls that landed.)
+
+---
+
+# 8. Which attacks, and why
 
 Everything above says *that* the judges disagree. None of it says *about what*, and "25% agreement" is not something anyone can inspect. So the 300 search attacks became explanations you can check one at a time: what the attacker wrote and which targets it named, what the agent actually called, what really happened and which call the verdict rests on, and what each judge said in its own words. The demo's **Click an attack** tab pages through them. The build script refuses to write the file unless the trace shown for every example, re-graded, reproduces the verdict stored for it — so the evidence on screen is the evidence the verdict rests on.
 
@@ -277,25 +311,25 @@ One claim did not come back. I originally wrote this up as *"all three judges in
 
 ---
 
-# 8. What bounds all of this, and what I would run next
+# 9. What bounds all of this, and what I would run next
 
-Not a novel defense. Not even a novel attack. A measurement of a measurement: in the one place the field usually cannot check — the partial-credit signal a quality-diversity red-team runs on — three judges keep persistently different archives, the cheapest tracks ground truth worst, and the effect is a stable offset rather than a runaway. All of it because an agentic environment hands you the answer key that text harmfulness withholds.
+Not a novel defense. Not even a novel attack. A measurement of a measurement: in the one place the field usually cannot check — the partial-credit signal a quality-diversity red-team runs on — three judges keep persistently different archives, the cheapest tracks ground truth worst, the effect is a stable offset rather than a runaway, and under direct selection pressure a judge's static over-crediting predicts how badly it steers. All of it because an agentic environment hands you the answer key that text harmfulness withholds.
 
 > [!WARNING]
-> **Every number in §5–§7 comes from one search run. k = 1.** One QD run, one shared candidate stream, 300 attacks, three archives grown from it. Elite sets are ~15 members, and a Jaccard difference of 0.1–0.15 at that size is inside run-to-run noise — which puts the judge *ordering* (§6) and the size of the pilot-to-real gap most at risk.
+> **The QD numbers come from one search run. k = 1.** One QD run, one shared candidate stream, 300 attacks, three archives grown from it (§5, §6). Elite sets are ~15 members, and a Jaccard difference of 0.1–0.15 at that size is inside run-to-run noise — which puts the judge *ordering* (§6) and the size of the pilot-to-real gap most at risk. The best-of-n result (§7) is a **separate** 512-attack draw and does not share this run, but it is one draw of its own.
 
-**What survives k = 1 and what does not.** The per-cell over-crediting (§7) is measured over 900 trials against a deterministic oracle and does not depend on the search converging anywhere. The base-rate test (§4) is a within-run contrast on 300 candidates and likewise does not. What needs replication is everything phrased as a *trajectory*: that the archives diverge and stay diverged, and that the judges rank in that order against the oracle.
+**What survives k = 1 and what does not.** The per-cell over-crediting (§8) is measured over 900 trials against a deterministic oracle and does not depend on the search converging anywhere. The base-rate test (§4) and the best-of-n selection curves (§7) are within-run contrasts and likewise do not. What needs replication is everything phrased as a *trajectory*: that the archives diverge and stay diverged, and that the judges rank in that order against the oracle.
 
 This is a different problem from the one §2.4 demotes. There, replicating at k ≥ 3 was the wrong fix because the MDE on a 38-attack comparison is driven by n, not k. Here the quantity of interest **is** a between-run property of the search, so replication is the only thing that can settle it.
 
 **Next, in order.**
 
-1. **k ≥ 2 with a different seed on the same grid** — the cheapest thing that converts §6 from a suggestive curve into a claim, and the one I intend to run next.
+1. **k ≥ 2 with a different seed on the same grid** — the cheapest thing that converts §6 from a suggestive curve into a claim, and the one I intend to run next. (Best-of-n, §7, is done; re-running it on a second draw is a free rider on this.)
 2. **Re-run [`scripts/l3_base_rate.py`](scripts/l3_base_rate.py) on that second run** — no extra cost, and it says whether the inbox-sweep confound is a property of this agent or of this run.
 3. **Persist full tool arguments in every result file**, and re-pin `accelerate` and `torch`. Until the first lands, every trained-defense number in §1.2 is frozen at a scorer setting nobody can interrogate.
 4. **Outcome-based reward**: replace the regex with a runtime check on recipient domain and action type, retrain GRPO on the same 114 prompts, and **recover SFT's 86.8% refusal rate without giving back A1** — lowering strict ASR while leaving refusal at 50% would not count as a fix.
 5. **A stronger adaptive attacker**, at the budget that broke twelve in-band defenses, and **a port to AgentDojo** (629 cases, MDE 25 → ~6 pp) adopting its *native* success definition rather than carrying §2.3's constants across.
-6. Then the open question I cannot close at this scale, and the natural thing to hand a lab that can: does this reproduce on a real grid and attack budget, and is a **pairwise-preference** fitness (the Rainbow Teaming choice, [arXiv:2402.16822](https://arxiv.org/abs/2402.16822), picked by its authors precisely to resist reward hacking) more oracle-stable than the absolute rubric EvoFlint adopted? I have the instrument. I do not have the compute to answer it at a scale anyone should trust.
+6. Then the open question I cannot close at this scale: does this reproduce on a real grid and attack budget, and is a **pairwise-preference** fitness (the Rainbow Teaming choice, [arXiv:2402.16822](https://arxiv.org/abs/2402.16822), picked by its authors precisely to resist reward hacking) more oracle-stable than an absolute severity rubric? I have the instrument. I do not have the compute to answer it at a scale anyone should trust.
 
 **Other limits.** The population scored in §5 was produced by PAIR, not by a QD loop, so what is measured there is divergence in the *inputs* to selection — §6 closes that gap but only at this scale. The Pareto analysis rests on unions of 7–36 strategies. One environment, one attack family, one agent backbone. n = 38 with MDE ≈ 25 pp on the defense comparisons. A toy threat model: synthetic emails in a 26-row inbox, no DKIM/SPF, no HTML rendering. `MAX_PAIR_ROUNDS = 2` is far below the literature norm, so the attack log contains weak attacks. Seeds only partly pinned. And the Anthropic judge could not be held to greedy decoding — `temperature` is not exposed on that API in the SDK used — so inter-judge disagreement carries sampling noise that intra-OpenAI disagreement does not.
 
@@ -316,7 +350,9 @@ Retired: integrating the two layers · threshold ablation · capping agent retry
 ```bash
 uv run python scripts/audit_report_numbers.py        # every number in this report
 uv run python scripts/audit_p0_numbers.py            # 79/79
-uv run python scripts/qd_atlas.py                    # §7
+uv run python scripts/qd_atlas.py                    # §8
+uv run python scripts/bon_analyze.py                 # §7  (needs bon_scores.json)
+uv run python scripts/bon_plot.py                    # §7 figures
 uv run python scripts/l3_base_rate.py                # §4
 uv run python scripts/resolution_diagnostics.py      # §2.4
 uv run python scripts/scorer_sensitivity.py          # §2.3
@@ -325,18 +361,18 @@ uv run python scripts/classifier_threshold_sweep.py  # §2.1 defect 4
 uv run python scripts/reproduction_cost.py           # appendix
 ```
 
-**Section map.** This report was reorganised twice on 2026-09-19: first to lead with the judge finding, then back into causal order once it was clear that the judge work is the *last act* of the story rather than the whole of it. Links from elsewhere may use either older numbering.
+**Section map.** Reorganised on 2026-09-19 to lead with the judge finding, then back into causal order; the best-of-n section (§7) was inserted on 2026-09-21 between "does it compound" and "which attacks". Links from elsewhere may use older numbering.
 
-| Original | Interim | Now | |
-|---|---|---|---|
-| §2, §3 | §8 | **§1** | the agent, the defenses, the training failures |
-| §4, §5 | §7 | **§2** | the instrument audit and the retractions |
-| §9.1, §9.2 | §1 | **§3** | the defect that was not mine |
-| §9.3 | §2 | **§4** | building the oracle |
-| §9.4, §9.5 | §3 | **§5** | what the judges do |
-| §9.6 | §4 | **§6** | does it compound |
-| §9.7 | §5 | **§7** | which attacks, and why |
-| §9.8 | §6 | **§8** | what bounds it, and what is next |
-| §6, §8 | §9 | appendix | cost and the TRL bug |
+| Now | | Was (pre-2026-09-21) |
+|---|---|---|
+| **§1** | the agent, the defenses, the training failures | §1 |
+| **§2** | the instrument audit and the retractions | §2 |
+| **§3** | the defect that was not mine | §3 |
+| **§4** | building the oracle | §4 |
+| **§5** | what the judges do | §5 |
+| **§6** | does it compound | §6 |
+| **§7** | *(new)* under pressure: best-of-n selection efficiency | — |
+| **§8** | which attacks, and why | §7 |
+| **§9** | what bounds it, and what is next | §8 |
 
 **Related work.** Indirect injection — Greshake et al. ([arXiv:2302.12173](https://arxiv.org/abs/2302.12173)), AgentDojo ([arXiv:2406.13352](https://arxiv.org/abs/2406.13352)), InjecAgent ([arXiv:2403.02691](https://arxiv.org/abs/2403.02691)). Adaptive-attack discipline — Tramèr et al. ([arXiv:2002.08347](https://arxiv.org/abs/2002.08347)), Carlini & Wagner ([arXiv:1705.07263](https://arxiv.org/abs/1705.07263)). Iterative jailbreaks — PAIR ([arXiv:2310.08419](https://arxiv.org/abs/2310.08419)), TAP ([arXiv:2312.02119](https://arxiv.org/abs/2312.02119)). Reward hacking — Skalse et al. ([arXiv:2209.13085](https://arxiv.org/abs/2209.13085)), Gao et al. ([arXiv:2210.10760](https://arxiv.org/abs/2210.10760)). Benchmark construct validity — [arXiv:2605.16282](https://arxiv.org/abs/2605.16282). Paired-eval resolution — [arXiv:2605.30315](https://arxiv.org/abs/2605.30315). In-band vs out-of-band systematisation — [arXiv:2606.26479](https://arxiv.org/abs/2606.26479).

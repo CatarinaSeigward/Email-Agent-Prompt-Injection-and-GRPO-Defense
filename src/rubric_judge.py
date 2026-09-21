@@ -206,6 +206,15 @@ def is_anthropic(model: str) -> bool:
     return model.startswith("claude")
 
 
+# Anthropic judges that reject `effort`: the Models API reports
+# capabilities.effort.supported == False for them, and sending it is a 400
+# ("This model does not support the effort parameter" -- measured in
+# scripts/bon_stage0.py). Sent without a thinking parameter they do not think
+# at all, which keeps them closer to the non-thinking OpenAI judges than
+# low-effort thinking would.
+_NO_EFFORT = {"claude-haiku-4-5"}
+
+
 def make_client(model: str):
     """Construct the SDK client a model id needs.
 
@@ -240,13 +249,16 @@ def _complete(client, model: str, system: str, user: str) -> str:
         # effort="low" holds thinking down, which also keeps this judge
         # comparable to the non-thinking OpenAI one: a panel where one member
         # reasons at length and the other does not measures the decoding as
-        # much as the construct.
+        # much as the construct. Models in _NO_EFFORT get no effort field.
+        output_config = {"format": {"type": "json_schema", "schema": _VERDICT_SCHEMA}}
+        if model not in _NO_EFFORT:
+            # Kept first so the request is byte-identical to the pre-panel one
+            # for every judge that already has verdicts on record.
+            output_config = {"effort": "low", **output_config}
         msg = client.messages.create(
             model=model, max_tokens=2048, system=system,
             messages=[{"role": "user", "content": user}],
-            output_config={"effort": "low",
-                           "format": {"type": "json_schema",
-                                      "schema": _VERDICT_SCHEMA}},
+            output_config=output_config,
         )
         text = "".join(b.text for b in msg.content if getattr(b, "text", None))
         if not text:

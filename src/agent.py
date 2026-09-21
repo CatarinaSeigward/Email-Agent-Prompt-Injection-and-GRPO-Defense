@@ -248,7 +248,14 @@ def build_agent(
     if classifier_guard is not None:
         tools = [_wrap_with_guard(t, classifier_guard) for t in ALL_TOOLS]
 
-    llm_kwargs = {"model": model_name, "temperature": 0}
+    llm_kwargs = {"model": model_name, "temperature": 0,
+                  # Resilience only: re-issues failed HTTP calls (429/5xx) with the
+                  # OpenAI SDK's exponential backoff, honouring retry-after. At
+                  # temperature=0 this changes no output -- a sweep of ~50 calls
+                  # per rollout run concurrently otherwise loses whole trajectories
+                  # to transient rate limits. The QD run was sequential and never
+                  # hit this. Override via AGENT_MAX_RETRIES.
+                  "max_retries": int(os.environ.get("AGENT_MAX_RETRIES", "8"))}
     if base_url:
         llm_kwargs["base_url"] = base_url
         llm_kwargs["api_key"] = os.environ.get("LOCAL_LLM_API_KEY", "not-needed")

@@ -97,12 +97,12 @@ def missing(name: str, script: str) -> None:
 
 def render_findings_page() -> None:
     render_header(
-        "**Where the oracle and the discipline in tabs 1–2 came from.** I built an email agent, "
+        "**Can someone hijack an AI email assistant just by sending it an email?** I built one, "
         "attacked it, defended it three ways — and then checked whether the numbers saying the "
         "defenses worked meant anything. **Two of my four headline findings did not survive that "
-        "check, and the instruments turned out to be broken in eight ways.** That audit is why "
-        "the judge measurement in tab 1 exists, and the reason to believe its ruler.",
-        title="The defense project, and the audit of it",
+        "check, and the instruments turned out to be broken in eight ways.** One of those defects "
+        "turned out not to be mine at all — tab **2** follows it out of this project.",
+        title="Measuring the Ruler",
     )
 
     with st.container(border=True):
@@ -1112,40 +1112,85 @@ def _gate_note(g: dict) -> str:
     return head + "It failed the gate, so the raw reasons are shown instead."
 
 
+def _render_bon_section() -> None:
+    """Best-of-n selection efficiency (report §7): does over-crediting predict
+    bad picks? Rendered inside the 'Pulling on the judge thread' tab."""
+    bon = load_result("bon_curves")
+    st.header("Under pressure: how far does each judge carry you from random?")
+    st.markdown(
+        "The last section asked whether disagreement grows with search *budget*. This asks how it "
+        "depends on selection *strength*, with the simplest optimiser there is: **draw *n* attacks, "
+        "keep the one a judge scores highest, and check what the agent actually did.** No training, so "
+        "the pressure is a dial. Seven judges this time, on a fresh 512-attack draw; two selectors "
+        "bracket every judge — picking at **random** (a floor) and picking by the **oracle** itself "
+        "(the ceiling perfect selection reaches given the agent's own noise)."
+    )
+    if not bon:
+        missing("bon_curves", "bon_analyze.py  (after bon_generate.py + bon_judge.py)")
+        return
+
+    fig = DIAGRAMS / "bon_efficiency.png"
+    if fig.exists():
+        st.image(str(fig), use_container_width=True,
+                 caption="Left: how far each judge's pick moves gold from random (0) to oracle (1) "
+                         "at n=32. Right: static over-crediting vs that efficiency.")
+
+    hb = bon["H-B"]
+    order = sorted(bon["meta"]["judges"], key=lambda m: bon["efficiency"][m]["32"], reverse=True)
+    rows = [{"judge": m,
+             "over-credit @n=1": f"{bon['over_credit_n1'][m] * 100:+.0f} pp",
+             "selection efficiency @n=32": f"{bon['efficiency'][m]['32']:.2f}",
+             "95% CI": f"[{bon['efficiency_ci95'][m]['32'][0]:.2f}, "
+                       f"{bon['efficiency_ci95'][m]['32'][1]:.2f}]"} for m in order]
+    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+
+    st.markdown(
+        "**Over-crediting and picking winners are different failures.** Static calibration predicts "
+        f"selection efficiency strongly — Spearman ρ = **{hb['spearman_rho']:.2f}**, exact "
+        f"p = {hb['p_one_sided_exact']:.3f} — but they are not the same axis: **gpt-4o and "
+        "claude-haiku over-credit almost identically (+21 vs +22 pp) yet select at 0.80 vs 0.44.** "
+        "A search consumes the *ranking*, and that is where the strong judges pull ahead.\n\n"
+        "**The cheapest judge is exactly random.** gpt-4.1-nano reaches gold 0.00 — it scores 98% of "
+        "attacks at the top level, so best-of-n draws from one undifferentiated bucket. A judge can be "
+        "precise enough to sort a benchmark and still carry **zero** information about which attack is "
+        "actually worse.\n\n"
+        "**A four-level score caps the pressure — maybe why the search settled.** Best-of-32's "
+        "closed-form KL is 2.50 nats, but a coarse rubric saturates once its top bucket is almost "
+        "always drawn; the judges top out at 1.1–1.6 nats. The search couldn't run away because the "
+        "signal it runs on runs out of resolution."
+    )
+    st.caption("Best-of-n tests the *top* of the distribution — which attack is best. The 25%-agreement "
+               "result above is about the *middle* — which near-misses deserve partial credit, which is "
+               "exactly what f_peak supplies. Both hold; they are about different parts of the judge. "
+               "One draw; the two priciest judges were rate-limited during scoring and refilled "
+               "(deviation D2).")
+
+
 def render_judge_page() -> None:
-    """Landing tab: the question, the three findings, then how each was reached."""
-    st.title("Measuring the Ruler")
+    """Second tab: the thread out of the audit, told in the order it happened."""
+    st.title("Pulling on the judge thread")
     st.markdown(
-        "#### Quality-diversity red-teaming uses an LLM judge's score as its fitness function. "
-        "On a text benchmark there is no ground truth to check that score against. "
-        "**In an agentic setting there is** — whether a tool ran is a fact, not an opinion. "
-        "So how far is the judge from the facts, and does the gap change what the search keeps?"
+        "*Tab 1 ends with eight broken instruments and two retracted claims. **One of those defects turned out not to be mine.** This page is what happened when I followed it out of my own project — told in the order it went, missteps included, because the missteps are half the point.*"
     )
-    st.markdown(
-        "- **Three judges agree on only 25%** of the strategies any of them gives partial credit to "
-        "(*p* = 0.0013), and the Pareto front they imply overlaps by as little as 11%. It is "
-        "**neither a provider nor a capability effect**: `gpt-4o` disagrees with `gpt-4o-mini` as "
-        "much as `claude-sonnet-5` does, so switching vendors and buying a smarter judge both fail.\n"
-        "- **It does not compound under search — it settles.** I expected run-away divergence and "
-        "measured a permanent offset instead.\n"
-        "- **All three judges over-credit the attacker** (+39, +20, +6 points), and the error is "
-        "**crediting, not fabricating**: they take actions the agent really took and tie them to the "
-        "attack. Tab **2** lets you read those one at a time.\n"
-        "- **What bounds it: k = 1**, one search run. See the end of this page."
-    )
-    st.caption("Full write-up: `final_report.md` (§3–§8) and `judge_dependence_report.md`. "
-               "Tab 3 is the defense project this grew out of, and why its numbers can be trusted.")
     st.divider()
 
-    st.header("Where the question came from")
+    st.header("The loose thread")
     st.markdown(
-        "§2.2 of the audit found the judge **fabricates** successes exactly when the defense works — "
-        "it narrates attacks on rollouts where the agent did nothing. I scoped it away here, because "
-        "this project's numbers are action-grounded. But almost everyone else's aren't. "
-        "**EvoFlint** ([arXiv:2609.00487](https://arxiv.org/html/2609.00487v1)), a nine-person lab's "
-        "red-team paper, scores each attack with `f_peak` = *max judge severity* — the exact signal I'd "
-        "found unreliable — on HarmBench, where there is no ground truth to check it against. "
-        "In an agentic setting there is: a tool-call trace is a deterministic oracle."
+        "§2.2 of the audit found the judge **fabricates** successes exactly when the defense "
+        "works — it narrates attacks on rollouts where the agent did nothing. I scoped it away, "
+        "correctly: this project's numbers are action-grounded, so none of them are affected. "
+        "Filed."
+    )
+    st.markdown(
+        "It kept bothering me for a reason that had nothing to do with my project. **Almost "
+        "everyone else's numbers *are* judge-based** — and quality-diversity red-teaming has "
+        "begun wiring judge severity straight into the fitness function, as an `f_peak` term "
+        "whose whole job is to give *failed* attacks a partial-credit gradient "
+        "([arXiv:2609.00487](https://arxiv.org/html/2609.00487v1) is a recent instance). The "
+        "usual target is text harmfulness, where there is no ground truth to check that score "
+        "against. **In an agentic setting there is**: a tool-call trace is a deterministic "
+        "oracle. That is the one thing such a setup structurally lacks, and the only reason a "
+        "toy inbox has anything to say about it."
     )
 
     st.header("Before measuring theirs, I had to check my own ruler — twice")
@@ -1282,7 +1327,9 @@ def render_judge_page() -> None:
         "it's wrong."
     )
 
-    st.header("What they actually get wrong — tab 2 has it attack by attack")
+    _render_bon_section()
+
+    st.header("What they actually get wrong — tab 3 has it attack by attack")
     st.markdown(
         "Numbers like *25% agreement* say the judges disagree, not **about what**. The "
         "**Attack atlas** tab answers that one attack at a time: what the attacker asked for, "
@@ -1307,17 +1354,17 @@ def render_judge_page() -> None:
 
 
 def main() -> None:
-    # Argument order, not project chronology. The judge finding is what this is
-    # for; the defense project it grew out of is provenance, so it comes after.
+    # Story order. The judge problem is where this ends up, not where it starts,
+    # so a reader meets it the way I did: after the defenses and after the audit.
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["1 · What does a judge measure?", "2 · Click an attack",
-         "3 · The defense project", "4 · Replay a rollout"])
+        ["1 · The project, and the audit of it", "2 · Pulling on the judge thread",
+         "3 · Click an attack", "4 · Replay a rollout"])
     with tab1:
-        render_judge_page()
-    with tab2:
-        render_atlas_page()
-    with tab3:
         render_findings_page()
+    with tab2:
+        render_judge_page()
+    with tab3:
+        render_atlas_page()
     with tab4:
         render_replay_page()
 

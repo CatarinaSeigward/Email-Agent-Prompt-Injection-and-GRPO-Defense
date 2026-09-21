@@ -6,7 +6,7 @@
 > Following that thread out of my own project ended somewhere I didn't expect: at a
 > published red-team method whose fitness function is an LLM judge nobody can check.
 
-[![audit: 163/163 + 79/79](https://img.shields.io/badge/audit-163%2F163%20%2B%2079%2F79-brightgreen)](scripts/audit_report_numbers.py) [![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](#license) [![demo: live](https://img.shields.io/badge/demo-live-FF4B4B?logo=streamlit&logoColor=white)](https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/)
+[![audit: 174/174 + 79/79](https://img.shields.io/badge/audit-174%2F174%20%2B%2079%2F79-brightgreen)](scripts/audit_report_numbers.py) [![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](#license) [![demo: live](https://img.shields.io/badge/demo-live-FF4B4B?logo=streamlit&logoColor=white)](https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/)
 
 > **Interactive demo (live)**: https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/ — no GPU/API needed. Or run locally: `uv run streamlit run demo/app.py`.
 
@@ -36,7 +36,7 @@ That's **indirect prompt injection**. The attacker never touched your account �
 
 **Step 4 is where the project turned, and step 5 is where it ends up.** Two of my four headline findings did not survive the audit, and the tools I had been measuring with turned out to be broken in eight separate ways. That audit — not the defenses — is what made step 5 possible.
 
-Every number here traces to a result file, checked by script: `scripts/audit_report_numbers.py` (163/163) and `scripts/audit_p0_numbers.py` (79/79).
+Every number here traces to a result file, checked by script: `scripts/audit_report_numbers.py` (174/174) and `scripts/audit_p0_numbers.py` (79/79).
 
 ## The five things worth knowing about the defense half
 
@@ -97,11 +97,12 @@ Same table as [§1.2](final_report.md#12-what-the-three-defenses-did). The `_loo
 
 The audit found my LLM grader inventing successes when the defense worked. I set that aside — my headline numbers don't use a grader, they check what the agent actually *did*. But most published red-team work **does** use a grader, and has no way to check it.
 
-So I tested that, on a real paper's method. This is the last act of the story, not a side quest: the walk-through runs from [§3](final_report.md#3-one-of-those-defects-was-not-mine) to [§8](final_report.md#8-what-bounds-all-of-this-and-what-i-would-run-next). The short version:
+So I tested that, on a published method. This is the last act of the story, not a side quest: the walk-through runs from [§3](final_report.md#3-one-of-those-defects-was-not-mine) to [§8](final_report.md#9-what-bounds-all-of-this-and-what-i-would-run-next). The short version:
 
-- **The setup.** [EvoFlint](https://arxiv.org/html/2609.00487v1) scores attacks by asking an LLM "how bad was that?", and uses the score to decide which attacks survive into the next generation. On text benchmarks there's no ground truth to check that score. **In my agentic setting there is** — whether a tool ran is a fact, not an opinion.
+- **The setup.** Quality-diversity red-teaming scores attacks by asking an LLM "how bad was that?", and uses the score to decide which attacks survive into the next generation ([a recent instance](https://arxiv.org/html/2609.00487v1)). On text benchmarks there's no ground truth to check that score. **In my agentic setting there is** — whether a tool ran is a fact, not an opinion.
 - **The finding.** Three graders (gpt-4o-mini, gpt-4o, claude-sonnet-5) agree on only **25%** of the attacks any of them gives partial credit to. It is **not** fixed by switching vendor or using a smarter grader — gpt-4o disagrees with gpt-4o-mini as much as Claude does.
 - **The part I got wrong.** I guessed this would snowball as the search ran. A first pass seemed to confirm it dramatically. A more careful rerun **retracted that** — it doesn't snowball, it settles into a permanent gap. Third retraction in this project, and the reason I trust the rest.
+- **Over-crediting ≠ picking badly.** I then turned the pressure up directly: draw *n* attacks, keep the one each judge scores highest, check what actually happened (best-of-n, 7 judges, 512 fresh attacks). Judges that over-credit by nearly the same amount select *completely* differently — gpt-4o and claude-haiku both over-credit ~+21 pp, but as selectors reach 80% vs 44% of the way from random to ground truth. The cheapest judge (gpt-4.1-nano) is **exactly random** — it scores 98% of attacks at the top level, so there's nothing to pick on. And static over-crediting predicts the whole ranking (Spearman ρ = **−0.93**). ([§7](final_report.md#7-under-pressure-how-far-does-each-judge-carry-you-from-random))
 - **What they actually get wrong** — you can click through it in the demo's **Click an attack** tab. The judges don't invent actions that never happened. They take **real** actions and credit them to the attacker: typically, the agent replied to the email the attack pointed at, but the reply went to that email's internal sender and never reached the attacker. All three over-credit, by **+39, +20 and +6 pp** on average across 12 cells (gpt-4o-mini's worst: 87% against a real 15%). Getting there took a detour I'd rather keep visible than hide: my ground truth never counts a delivery to someone *inside* the company while the judges' rubric does, so I first assumed those credits were my blind spot and dropped them. Then the base rate settled it — this agent replies to the whole inbox anyway, and naming an email in the attack doesn't make it any more likely to be replied to or quoted, while naming *does* raise deletions. The credits are coincidences. The demo keeps a switch for the stricter reading.
 - **The limit on all of it: k = 1.** One search run. Elite sets are ~15 members, so a Jaccard difference of 0.1–0.15 is inside run-to-run noise — which puts the *ordering* of the judges, and the size of the pilot-to-real gap, most at risk. The over-crediting numbers and the base-rate test are within-run contrasts against a deterministic oracle and don't depend on the search converging; anything phrased as a trajectory does. **Next: k ≥ 2 on a second seed**, with `scripts/l3_base_rate.py` re-run on it to see whether the inbox-sweep confound is a property of this agent or of this run.
 
@@ -153,7 +154,7 @@ uv run python eval_combined.py        # 4 corner cases, ~45 min
 uv run python scripts/eval_p0.py --k 3 # replicated naive vs hardened baselines, ~80 min
 
 # 3. Verify every reported number against its result file
-uv run python scripts/audit_report_numbers.py  # expect 163/163 OK
+uv run python scripts/audit_report_numbers.py  # expect 174/174 OK
 uv run python scripts/audit_p0_numbers.py      # expect 79/79 OK
 ```
 
@@ -182,7 +183,8 @@ Three documents, read in this order:
 | **§5** — do judges keep different strategies? | `results/rank_divergence.json` |
 | **§5** — which prompt choice causes fabrication | `results/presentation_ablation.json` |
 | **§6** — archive overlap vs search budget | `results/qd_{pilot,real}_analysis.json` · `results/qd_pilot_vs_real.png` |
-| **§7** — which attacks succeeded, and why each judge disagreed | `results/qd_atlas.json` · demo *Click an attack* tab · hand labels in `data/judge_error_labels.json` |
+| **§7** — best-of-n selection efficiency per judge (does over-crediting predict bad picks?) | `results/bon_curves.json` · `scripts/bon_analyze.py` · figures in `docs/diagrams/bon_*.png` |
+| **§8** — which attacks succeeded, and why each judge disagreed | `results/qd_atlas.json` · demo *Click an attack* tab · hand labels in `data/judge_error_labels.json` |
 | **§4** — are the judges' internal-delivery credits real compliance or the inbox sweep? | `results/l3_base_rate.json` · `scripts/l3_base_rate.py` |
 
 ## Repo layout
@@ -244,14 +246,14 @@ email-agent-redteam/
 
 | Check | Status |
 |---|---|
-| Every number cited in `final_report.md` traces to a result file | ✅ 163/163 (`scripts/audit_report_numbers.py`) |
+| Every number cited in `final_report.md` traces to a result file | ✅ 174/174 (`scripts/audit_report_numbers.py`) |
 | Every number cited in `p0_analysis.md` traces to a result file | ✅ 79/79 (`scripts/audit_p0_numbers.py`) |
 | Adapter weights checked in via git-lfs | ❌ adapters/ is gitignored (regenerate via RUNBOOK §2–6) |
 | OpenAI temperature / seed | ⚠️ **temperature=0 is not enough.** Measured run-to-run SD is **12.1 pp** with a pinned `gpt-4o-mini-2024-07-18` snapshot; 20/38 attack rows flip outcome between identical replays. Any single-run number here carries that. (§8, Other limits) |
 | PAIR campaign | Deterministic up to OpenAI sampling; `MAX_PAIR_ROUNDS=2` (lower than literature norm — §8, Other limits) |
 | Training | Seeds pinned for classifier dataset split and GRPO prompt shuffle; GRPO rollouts not pinned |
 
-Known limitations and threats to validity are enumerated in **[final_report.md §8](final_report.md#8-what-bounds-all-of-this-and-what-i-would-run-next)**.
+Known limitations and threats to validity are enumerated in **[final_report.md §9](final_report.md#9-what-bounds-all-of-this-and-what-i-would-run-next)**.
 
 ## Citations
 

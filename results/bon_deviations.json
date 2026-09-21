@@ -1,0 +1,39 @@
+{
+  "deviations": [
+    {
+      "id": "D1",
+      "gate": "Gate 2 (attack diversity), personaldoc/BoN实施计划.md §3",
+      "preregistered_rule": "distinct-4 over all N=512 attacks >= 0.75",
+      "observed": 0.635,
+      "preregistered_outcome": "FAILED",
+      "why_the_rule_was_wrong": "distinct-4 falls mechanically with corpus size: common 4-grams repeat more often as texts are added, even when each text is equally diverse. The 0.75 threshold was set from a 50-attack baseline (0.831) and applied to 512 attacks. The same new attacks subsampled to each size give the curve below.",
+      "evidence": {
+        "distinct4_by_subsample_size": {
+          "50": 0.821,
+          "100": 0.775,
+          "300": 0.682,
+          "512": 0.635
+        },
+        "baseline_old_genesis_n50": 0.831,
+        "baseline_old_archive_n300": 0.699,
+        "within_cell_pairs": 10668,
+        "within_cell_word_jaccard_max": 0.542,
+        "within_cell_word_jaccard_median": 0.238,
+        "near_duplicate_pairs_jaccard_gt_0.8": 0,
+        "exact_duplicate_bodies": 0
+      },
+      "revised_rule": "what the gate was for -- BoN drawing the same attack n times: zero within-cell near-duplicates (word Jaccard > 0.8) AND distinct-4 on 50-attack subsamples within 0.03 of the n=50 baseline",
+      "revised_outcome": "PASSED",
+      "safeguard": "changed before any outcome data existed: no rollout had run and no judge had scored any BoN attack, so the change cannot have been chosen to produce a result. It is a data-quality gate, not a hypothesis rule; every hypothesis and endpoint in results/bon_preregistration.json is untouched, and that file stays frozen.",
+      "attacks_file_sha256": "01f306d4b3ae3fc6aad8251e132f0c05aef2a4c3e67962b1b3ca4469afb57755"
+    },
+    {
+      "id": "D2",
+      "stage": "Stage 4 (judge scoring)",
+      "issue": "At 8 threads the two priciest OpenAI judges (gpt-4o, gpt-4.1) hit organisation TPM limits; ~40-55% of their calls returned level=None after the built-in single retry on the first pass.",
+      "resolution": "judge_severity never caches a failure, so re-running at lower concurrency (3, then 2) refilled only the None verdicts. Final state: all 7 judges 0 failures on the main proxy scoring, which is what every hypothesis rests on.",
+      "residual": "Self-noise (cache-bypassing, redone in full each pass) never fully cleared for those two judges: 28/64 and 23/64 triples still carried a rate-limit None. Self-agreement is therefore reported over CLEAN triples only, with the None count shown separately: gpt-4o 97% (28 rate-limited), gpt-4.1 100% (23). Among calls that succeeded, both are as self-consistent as the other five judges (91-100%).",
+      "no_frozen_code_touched": "src/rubric_judge.py stayed frozen; the fix was the orchestration --workers flag in scripts/bon_judge.py and a clean-triple self-noise metric in scripts/bon_analyze.py, neither of which touches a hypothesis or the estimator."
+    }
+  ]
+}
