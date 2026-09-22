@@ -569,37 +569,7 @@ def render_findings_page() -> None:
             "80% power for any effect. The experiment could not have succeeded."
         )
 
-    # ══════════════════════════════════════════════════════════════════
-    # §2  Next steps
-    # ══════════════════════════════════════════════════════════════════
-    st.divider()
-    st.header("§8 · Ordered next steps")
-    st.dataframe(pd.DataFrame([
-        {"#": 1, "Step": "Persist full tool arguments in every result file", "Why": "Cheapest item and a prerequisite — until it lands, every trained-defense number is frozen at a scorer setting nobody can interrogate (§2.1)"},
-        {"#": 2, "Step": "Re-pin accelerate and torch", "Why": "§2.1's segfault; record the working set"},
-        {"#": 3, "Step": "Outcome-based reward and retrain GRPO", "Why": "Target: recover the 86.8% refusal rate SFT already had without giving back A1 (§1.3)"},
-        {"#": 4, "Step": "A stronger adaptive attacker", "Why": "§1.2's 0/30 is gpt-4o-mini at 5 rounds. The successor is GCG / RL / human-guided at the budget that broke twelve in-band defenses — not a different target"},
-        {"#": 5, "Step": "Port to AgentDojo (n = 629)", "Why": "MDE 25 pp → ~6 pp (§2.4). Adopt its native success definition rather than carrying §2.3's constants across"},
-        {"#": 6, "Step": "Independent judge, inter-judge κ", "Why": "Step 1 of making §2.2 a claim rather than an observation"},
-    ]), hide_index=True, width="stretch")
-    st.caption("Retired: replicating at k ≥ 3 (MDE depends on n, not k) · capping agent retry budget (presupposed the retracted mechanism) · any deployment recommendation.")
-
-    # ══════════════════════════════════════════════════════════════════
-    # §8  Cost
-    # ══════════════════════════════════════════════════════════════════
-    rc = load_result("reproduction_cost")
-    if rc:
-        st.divider()
-        st.header("§8 · Reproduction cost — measured, not estimated")
-        c = st.columns(4)
-        c[0].metric("Measured API spend", f"${rc['measured_total_usd']:.2f}", delta=f"{rc['measured_rollouts']} instrumented rollouts", delta_color="off")
-        c[1].metric("Project total (est.)", f"${rc['project_total_estimate_usd']:.2f}", delta="≈ the unverified runbook figure of $1.20", delta_color="off")
-        c[2].metric("Prompt cache fraction", pct(rc["cache_fraction"], 1), delta="never modelled before this", delta_color="off")
-        c[3].metric("Pre-run estimate error", "2.6× too high", delta="same confidence, days earlier", delta_color="inverse")
-        st.caption(
-            "The unverified number happened to be right, and that is not the same as having been justified. "
-            "T10 was open not because $1.20 was wrong but because nothing in the repository could have told anyone whether it was."
-        )
+    
 
 
 def render_completion_inspector() -> None:
