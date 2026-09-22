@@ -19,10 +19,15 @@ This opens `http://localhost:8501`.
 
 The four tabs follow the story in the order it happened.
 
-1. **The short version.** The attack in one example, the three defenses and why the
-   14-line prompt won, how RL training made the model refuse less (with a viewer for
-   individual completions), the four most important problems the self-audit found, and
-   what I took back.
+1. **Attack, defend, audit.** The attack in one example, why the project uses an email
+   agent (the tradeoff: checkable ground truth in exchange for a toy setting), the three
+   defenses, how RL training made the model refuse less (with a viewer for individual
+   completions), the four most important problems the self-audit found, and what I took
+   back.
+
+Every tab opens with the same collapsed glossary, *Terms used in this project*, which
+defines each specialist term that appears anywhere in the demo, so a reader with general
+ML background can follow any tab without leaving it.
 2. **Checking the judges.** Why LLM-judge scores matter beyond this project, how my own
    ground truth had to be fixed twice, and the three findings: the judges disagree about
    partial credit, the gap settles instead of growing during a search, and how well each
@@ -60,10 +65,11 @@ page. Each tab links to it.
 |---|---|---|
 | 1 · defenses chart | `p0_summary.json`, `attack_{guard,verifier_only,combined}.json`, `benign_*.json` | `scripts/eval_p0.py`, `eval_combined.py` |
 | 1 · adaptive attack | `e2_analysis.json` | `scripts/e2_analyze.py` |
+| 1 · task completion under attack | `task_completion.json` (replays in `results/task_completion/`) | `scripts/task_completion.py` (API calls) |
 | 1 · completion viewer | `grpo_behavioral_attack.json` | `eval_grpo_attack.py` |
 | 1 · scorer chart | `scorer_sensitivity.json` | `scripts/scorer_sensitivity.py` |
 | 1 · cost line | `reproduction_cost.json` | `scripts/reproduction_cost.py` |
-| 2 · judge disagreement | `rank_divergence.json` | `scripts/rank_divergence.py` |
+| 2 · judge disagreement | `rank_divergence.json`, `partial_credit_ci.json` | `scripts/rank_divergence.py`, `scripts/partial_credit_ci.py` |
 | 2 · search figure | `qd_pilot_vs_real.png` | — (saved figure; no script in the repo writes it) |
 | 2 · best-of-n figure | `docs/diagrams/bon_efficiency.png`, `bon_curves.json` | `scripts/bon_plot.py`, `scripts/bon_analyze.py` |
 | 3 · attack map | `qd_atlas.json` | `scripts/qd_atlas.py` |

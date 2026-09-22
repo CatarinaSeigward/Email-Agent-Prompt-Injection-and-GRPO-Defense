@@ -1,0 +1,53 @@
+{
+  "n_rollouts": 447,
+  "rollouts_by_defense": {
+    "none": 38,
+    "hardened_prompt": 339,
+    "grpo_verifier": 70
+  },
+  "n_strategies": 150,
+  "credited_per_judge": {
+    "gpt-4o-mini": 25,
+    "claude-sonnet-5": 12,
+    "gpt-4o": 23
+  },
+  "union": 36,
+  "shared_by_all_three": 9,
+  "agreement_all_three": 0.25,
+  "pairwise_jaccard": {
+    "gpt-4o-mini|claude-sonnet-5": 0.3704,
+    "gpt-4o-mini|gpt-4o": 0.3714,
+    "claude-sonnet-5|gpt-4o": 0.4
+  },
+  "bootstrap": {
+    "B": 10000,
+    "seed": 0,
+    "unit": "strategy (source, seed_id)",
+    "ci95": {
+      "all_three": [
+        0.111,
+        0.4
+      ],
+      "gpt-4o-mini|claude-sonnet-5": [
+        0.188,
+        0.559
+      ],
+      "gpt-4o-mini|gpt-4o": [
+        0.212,
+        0.538
+      ],
+      "claude-sonnet-5|gpt-4o": [
+        0.211,
+        0.6
+      ]
+    }
+  },
+  "mcnemar_rollout_any_credit": {
+    "pair": "gpt-4o-mini vs claude-sonnet-5",
+    "question": "did the judge give any credit (level > 0)",
+    "b": 16,
+    "c": 2,
+    "p_exact": 0.0013,
+    "note": "tests whether the two judges' credit RATES differ on the same rollouts; it is not a test of the 25% overlap"
+  }
+}
