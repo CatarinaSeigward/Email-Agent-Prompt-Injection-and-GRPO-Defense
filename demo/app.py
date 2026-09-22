@@ -74,6 +74,18 @@ def render_glossary() -> None:
 | **Retracted finding** | A claim this project made and later withdrew after testing it properly. Two of the original four. |
 """
         )
+        st.caption(
+            "**Methods & references.** GRPO ([DeepSeekMath, arXiv:2402.03300](https://arxiv.org/abs/2402.03300)) · "
+            "QLoRA ([arXiv:2305.14314](https://arxiv.org/abs/2305.14314)) · "
+            "DPO ([arXiv:2305.18290](https://arxiv.org/abs/2305.18290)) · "
+            "ModernBERT ([arXiv:2412.13663](https://arxiv.org/abs/2412.13663)) · "
+            "PAIR red team ([arXiv:2310.08419](https://arxiv.org/abs/2310.08419)) · "
+            "LLM-as-judge ([Zheng et al., arXiv:2306.05685](https://arxiv.org/abs/2306.05685)) · "
+            "MAP-Elites ([arXiv:1504.04909](https://arxiv.org/abs/1504.04909)) + NSLC (Lehman & Stanley, GECCO 2011) · "
+            "NSGA-II (Deb et al., IEEE TEC 2002) · "
+            "reward over-optimisation / best-of-n ([Gao et al., arXiv:2210.10760](https://arxiv.org/abs/2210.10760)) · "
+            "McNemar (1947) · Cohen's κ (1960). Full list in `final_report.md`."
+        )
 
 
 def render_header(subtitle: str, title: str = "Measuring the Ruler") -> None:
@@ -1284,7 +1296,8 @@ def render_judge_page() -> None:
     st.header("Does it compound under search? I guessed yes. It doesn't.")
     st.markdown(
         "A disagreement in the *inputs* to selection isn't archives that *end up* different. So I ran "
-        "the actual search — MAP-Elites + NSLC, three judges each growing an archive from one shared "
+        "the actual search — MAP-Elites ([arXiv:1504.04909](https://arxiv.org/abs/1504.04909)) + NSLC, "
+        "three judges each growing an archive from one shared "
         "candidate stream, the oracle scoring everything but hidden from selection."
     )
     pilot = load_result("qd_pilot_analysis")
