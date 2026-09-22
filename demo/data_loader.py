@@ -16,8 +16,8 @@ REPO = Path(__file__).resolve().parent.parent
 RESULTS = REPO / "results"
 DATA = REPO / "data"
 
-# Defense configurations available in the replay picker, in display order.
-# The p0_* entries are the k=3 replicate runs behind report §3.4; r1 is shown
+# Defense configurations the demo can load, in display order.
+# The p0_* entries are the k=3 replicate runs behind report §1.2; r1 is shown
 # because every replicate has the same 38 rows and the picker only needs one.
 ATTACK_LABELS = [
     "p0_naive_r1",
@@ -31,15 +31,19 @@ ATTACK_LABELS = [
 ]
 BENIGN_LABELS = ATTACK_LABELS  # symmetric
 
+# The replay tab offers only these. `baseline` duplicates the naive prompt, and
+# the `_loose` variants belong to a comparison the report retracted (§2.5).
+REPLAY_LABELS = ["p0_naive_r1", "p0_hardened_r1", "guard", "verifier_only", "combined"]
+
 DISPLAY_NAME = {
-    "p0_naive_r1": "Naive prompt (replicate 1)",
-    "p0_hardened_r1": "Hardened prompt (replicate 1)",
+    "p0_naive_r1": "Naive prompt (no defense)",
+    "p0_hardened_r1": "Hardened prompt",
     "baseline": "Baseline (no defense)",
-    "guard": "Classifier only",
-    "verifier_only": "Verifier (strict)",
-    "verifier_only_loose": "Verifier (loose)",
-    "combined": "Combined (strict)",
-    "combined_loose": "Combined (loose)",
+    "guard": "Classifier",
+    "verifier_only": "RL verifier",
+    "verifier_only_loose": "RL verifier (loose)",
+    "combined": "Classifier + RL verifier",
+    "combined_loose": "Classifier + RL verifier (loose)",
 }
 
 
@@ -70,7 +74,7 @@ def load_benign(label: str) -> dict:
 def load_result(name: str) -> dict | None:
     """Load an arbitrary `results/{name}.json`, or None if it has not been generated.
 
-    Used for the instrument-audit artefacts (report §4), which are produced by
+    Used for the audit and judge artefacts (report §2–§8), which are produced by
     the `scripts/*.py` drivers rather than by training. Returning None lets the
     page degrade to a "not generated" note instead of crashing.
     """

@@ -194,7 +194,7 @@ email-agent-redteam/
 ├── README.md                       # this file
 ├── final_report.md                 # the full writeup, in the order it happened
 ├── judge_dependence_report.md      # §3-§8 as a standalone, every number traced
-├── demo/                           # Streamlit dashboard; tab 1 is the judge finding
+├── demo/                           # Streamlit dashboard: overview, judges, click an attack, replay
 ├── p0_analysis.md                  # the self-audit: paired tests, replicates, retractions
 ├── src/
 │   ├── agent.py                    # LangGraph ReAct agent + 5 tools + Guard interface

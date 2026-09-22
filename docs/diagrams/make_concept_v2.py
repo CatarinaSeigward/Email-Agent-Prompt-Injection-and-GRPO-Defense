@@ -4,14 +4,14 @@ Supersedes make_concept.py, which was deleted 2026-09-14 along with its outputs
 (attack_concept.png/svg) once nothing referenced them. What it got wrong, kept
 here because the corrections are the point:
 
-- Gate order now matches runtime. §4.6/§5: the ModernBERT classifier runs
+- Gate order now matches runtime (src/combined_guard.py): the ModernBERT classifier runs
   FIRST (~5 ms) and short-circuits; the Qwen verifier escalates only on
   pass (~1 s). v1 drew them in the opposite order, which implied a 1 s
   LLM call on every destructive tool call.
 - The hardened system prompt is shown. It is the project's best measured
-  defense (0.0% ASR, §4.9) and was absent from v1 entirely.
+  defense (0.0% ASR, §1.2) and was absent from v1 entirely.
 - Bottom note replaced. v1 asserted "agent typically retries with modified
-  arguments" — the mechanism §7.7 retracts. It now states §7.7's measured
+  arguments" — the mechanism §2.5 retracts. It now states §2.5's measured
   replacement finding (attempt budget = |inbox|, invariant across configs).
 - Attack taxonomy and measured ASR merged into one panel, so the figure
   carries the headline numbers instead of only the architecture.
@@ -23,6 +23,11 @@ Outputs:
   docs/diagrams/attack_concept_v2.svg
 
 Run: uv run python docs/diagrams/make_concept_v2.py
+
+Section references follow final_report.md as renumbered on 2026-09-21. They were
+updated on 2026-09-22; until then the figure cited §4.9, §7.7 and §9.1, which no
+longer exist. The adaptive-attack caveat was updated at the same time, because
+the adaptive attack it said was missing has since been run (§1.2).
 """
 
 from __future__ import annotations
@@ -106,7 +111,7 @@ def main() -> None:
         arrow(ax, 33, 75, 33, 70)
         label(ax, 34.5, 72.5, "agent reads all 26")
 
-        # Defense 0 — the system prompt (best measured result, §4.9)
+        # Defense 0 — the system prompt (best measured result, §1.2)
         box(ax, 33, 54, 38, 6.5,
             "DEFENSE 0 · system prompt   (no training, no GPU)\n"
             "draws a trust boundary: obey the user, ignore the inbox",
@@ -117,7 +122,7 @@ def main() -> None:
         arrow(ax, 33, 50.5, 33, 45.5, color=ATTACK_RED)
         label(ax, 34.5, 48, "if it still wants:\nforward(to=evil@…)", color=ATTACK_RED)
 
-        # Gate 1 — classifier FIRST (cheap), per §4.6/§5
+        # Gate 1 — classifier FIRST (cheap), as in src/combined_guard.py
         box(ax, 33, 41.5, 38, 6,
             "GATE 1 · ModernBERT classifier      ~5 ms\n"
             "sees (tool_name, args, referenced email body)",
@@ -169,21 +174,21 @@ def main() -> None:
         ax.text(px + 38, 29, "76.7%", fontsize=9.5, ha="right", va="top", family="monospace")
 
         ax.text(px, 24.5,
-                "Run-to-run SD of this harness: ±12.1 pp (§9.1 T8).\n"
-                "GATE 1 / GATE 2 are single runs, so they are not\n"
-                "ranked here — see §1.2.",
+                "Naive varies by ±12.1 pp between identical replays (§1.2).\n"
+                "GATE 1 / GATE 2 ran once each, and 38 attacks can't\n"
+                "separate them, so they are not ranked here (§2.4).",
                 fontsize=7.5, color=TEXT_GREY, ha="left", va="top")
 
         ax.text(px, 13.5,
-                "Caveat (§4.9): the attacks were generated against the\n"
-                "naive prompt. DEFENSE 0's 0.0% is measured under a\n"
-                "non-adaptive attacker.",
+                "Caveat: these attacks were written against the naive\n"
+                "prompt. An adaptive attacker shown DEFENSE 0 verbatim\n"
+                "also cracked 0 of 30 seeds, but the 95% bound is 9.5% (§1.2).",
                 fontsize=7.5, color=ATTACK_RED, ha="left", va="top")
 
-        # ── bottom note: §7.7 replacement finding (not the retracted one) ──
+        # ── bottom note: §2.5 replacement finding (not the retracted one) ──
         ax.text(
             50, 4.5,
-            "A blocked call is not a retry: the agent sweeps every email once, so the attacker gets B = |inbox| attempts in all six configurations (§7.7).",
+            "A blocked call is not a retry: the agent sweeps every email once, so the attacker gets B = |inbox| attempts in all six configurations (§2.5).",
             ha="center", fontsize=8.5, style="italic", color=TEXT_GREY,
         )
         ax.text(

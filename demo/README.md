@@ -1,7 +1,7 @@
 # Demo · Streamlit dashboard
 
-Interactive companion to [`final_report.md`](../final_report.md), following its
-structure section by section. Two tabs, no model inference, no API calls.
+An interactive companion to [`final_report.md`](../final_report.md). It reads saved
+result files only: no model inference and no API calls.
 
 **Live URL**: <https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/>
 
@@ -13,71 +13,71 @@ $env:PYTHONIOENCODING="utf-8"
 uv run streamlit run demo/app.py
 ```
 
-Opens `http://localhost:8501`. Two tabs:
+This opens `http://localhost:8501`.
 
-- **Findings** — mirrors the report. §1 the question and the ledger; §3 what
-  the three defenses did, with a per-completion inspector that scores one
-  GRPO output three ways; **§4 eight ways the instruments were wrong** — the
-  judge-fabrication table, an interactive sweep of the scorer's
-  `REPLY_EXFIL_MIN_BODY` constant, the classifier threshold sweep, and the
-  resolution diagnostics; §5 what was retracted; §7 next steps; §8 measured cost.
-- **Replay an attack** — pick one of the 38 attacks and compare two
-  configurations side by side. Defaults to **naive vs hardened prompt**, which
-  shows the one result no scorer, judge or sample size can move: zero
-  destructive calls. Among trained configurations the per-row attempt counter
-  is the direct evidence for §5.1 — ~25 attempts regardless of guard, because
-  the agent sweeps a 26-email inbox rather than retrying.
+## What's on it
 
-A collapsible Glossary at the top of each tab defines every term
-(A1/A2/A3, ASR, in-band vs out-of-band, MDE, judge fabrication, scorer free
-parameter, paired McNemar, retracted finding).
+The four tabs follow the story in the order it happened.
 
-> **Note on retractions.** Earlier versions of this dashboard presented the
-> *agent-retry paradox* as the headline finding and recommended the loose
-> verifier for deployment. Both were withdrawn ([`p0_analysis.md`](../p0_analysis.md)).
-> The dashboard carries the retractions inline (§5) rather than dropping them.
+1. **The short version.** The attack in one example, the three defenses and why the
+   14-line prompt won, how RL training made the model refuse less (with a viewer for
+   individual completions), the four most important problems the self-audit found, and
+   what I took back.
+2. **Checking the judges.** Why LLM-judge scores matter beyond this project, how my own
+   ground truth had to be fixed twice, and the three findings: the judges disagree about
+   partial credit, the gap settles instead of growing during a search, and how well each
+   of seven judges picks the most dangerous attack.
+3. **Click an attack.** A map of 300 search attacks by risk and style. Click a cell, pick
+   an example, and follow it through four steps: the attack email, what the agent did,
+   what really happened, and what each judge said. A switch shows the stricter reading
+   that ignores judge credit for messages sent to colleagues.
+4. **Replay an attack.** Any of the 38 attacks under two defense setups side by side. The
+   default pairing, naive against hardened prompt, shows the one result no scoring choice
+   can change: zero destructive calls.
+
+The statistics behind each claim (power calculations, the classifier threshold sweep,
+variance estimates, the full ledger of retractions) stay in the report rather than on the
+page. Each tab links to it.
 
 ## Deploy to Streamlit Community Cloud
 
-1. Push the repo to GitHub (`results/` is tracked — see root `.gitignore`)
-2. [share.streamlit.io](https://share.streamlit.io) → New app → this repo → `demo/app.py` → Python 3.11
-3. Streamlit installs from **`requirements.txt` at the repository root**
+1. Push the repo to GitHub (`results/` is tracked; see the root `.gitignore`).
+2. [share.streamlit.io](https://share.streamlit.io) → New app → this repo → `demo/app.py` → Python 3.11.
+3. Streamlit installs from **`requirements.txt` at the repository root**.
 
 > [!IMPORTANT]
-> **Streamlit Cloud does not read `demo/requirements.txt`.** It resolves
-> dependencies from the repo root and stops at the first file it recognises.
-> With only `pyproject.toml` at root it installed the full training stack —
-> torch pinned to a CUDA 12.4 wheel index via `[tool.uv.sources]`, plus
-> transformers / trl / peft / bitsandbytes — into a CPU-only container. The
-> build fails and the app reports it as an `ImportError` with the message
-> redacted, which points at the wrong line. Root `requirements.txt` exists to
-> shadow `pyproject.toml`; do not delete it.
+> **Streamlit Cloud does not read `demo/requirements.txt`.** It looks for dependencies
+> from the repo root and stops at the first file it recognises. With only
+> `pyproject.toml` at the root, it installed the full training stack (torch pinned to a
+> CUDA 12.4 wheel index, plus transformers, trl, peft and bitsandbytes) into a CPU-only
+> container. The build fails, and the app reports it as an `ImportError` with the message
+> redacted, which points at the wrong line. The root `requirements.txt` exists to shadow
+> `pyproject.toml`, so don't delete it.
 
 ## Data source
 
-Everything renders from `results/*.json` and `data/attack_log.jsonl`:
-
-| Page section | Files | Regenerate with |
+| Tab | Files | Regenerate with |
 |---|---|---|
-| §3.1 configurations | `attack_{baseline,guard,verifier_only,combined}.json`, `attack_p0_hardened_r1.json`, `benign_*.json` | `eval_combined.py`, `scripts/eval_p0.py` |
-| §3.2 inspector | `grpo_behavioral_attack.json` | `eval_grpo_attack.py` |
-| §3.4 adaptive attack | `e2_analysis.json` | `scripts/e2_analyze.py` |
-| §4.1 judge | `e2_rescore.json` | `scripts/e2_rescore.py` |
-| §4.2 scorer sweep | `scorer_sensitivity.json` | `scripts/scorer_sensitivity.py` |
-| §4.4 classifier | `classifier_threshold_sweep.json` | `scripts/classifier_threshold_sweep.py` |
-| §4.5 resolution | `resolution_diagnostics.json`, `e2v_analysis.json` | `scripts/resolution_diagnostics.py`, `scripts/e2v_analyze.py` |
-| §8 cost | `reproduction_cost.json` | `scripts/reproduction_cost.py` |
-| Replay tab | any `attack_*.json` with a `details` array; attack bodies from `attack_log.jsonl` | — |
+| 1 · defenses chart | `p0_summary.json`, `attack_{guard,verifier_only,combined}.json`, `benign_*.json` | `scripts/eval_p0.py`, `eval_combined.py` |
+| 1 · adaptive attack | `e2_analysis.json` | `scripts/e2_analyze.py` |
+| 1 · completion viewer | `grpo_behavioral_attack.json` | `eval_grpo_attack.py` |
+| 1 · scorer chart | `scorer_sensitivity.json` | `scripts/scorer_sensitivity.py` |
+| 1 · cost line | `reproduction_cost.json` | `scripts/reproduction_cost.py` |
+| 2 · judge disagreement | `rank_divergence.json` | `scripts/rank_divergence.py` |
+| 2 · search figure | `qd_pilot_vs_real.png` | — (saved figure; no script in the repo writes it) |
+| 2 · best-of-n figure | `docs/diagrams/bon_efficiency.png`, `bon_curves.json` | `scripts/bon_plot.py`, `scripts/bon_analyze.py` |
+| 3 · attack map | `qd_atlas.json` | `scripts/qd_atlas.py` |
+| 4 · replay | `attack_{p0_naive_r1,p0_hardened_r1,guard,verifier_only,combined}.json`; attack bodies from `data/attack_log.jsonl` | — |
 
-Sections whose result file is missing render a one-line "not generated" note
-instead of crashing, so a partial `results/` dump still produces a usable page.
+If a result file is missing, its section shows a one-line "not generated yet" note instead
+of crashing, so a partial `results/` folder still gives a usable page.
 
 ## Files
 
 ```
 demo/
-├── app.py            # both tabs in one file
-├── data_loader.py    # @st.cache_data wrappers; load_result() for the §4 artefacts
+├── app.py            # all four tabs
+├── data_loader.py    # cached loaders; load_result() returns None for missing files
 ├── requirements.txt  # streamlit + plotly + pandas only
 └── README.md
 ```

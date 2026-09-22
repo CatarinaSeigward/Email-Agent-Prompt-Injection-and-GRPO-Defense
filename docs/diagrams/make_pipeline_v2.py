@@ -35,6 +35,12 @@ Outputs:
   docs/diagrams/pipeline_v2.svg
 
 Run: uv run python docs/diagrams/make_pipeline_v2.py
+
+Updated 2026-09-22: the figure cited §3.2.5 and §4.8 and an internal task id
+(T12) from before the 2026-09-21 renumbering, and printed line and check counts
+that had gone stale. Section references now follow the current report, and the
+counts are gone, since they drift with every edit. The section numbers in the
+notes above describe the report as it was on 2026-09-14.
 """
 
 from __future__ import annotations
@@ -123,7 +129,7 @@ def main() -> None:
         box(ax, 11, 78, 20, 7,
             "DPO  ·  abandoned\n"
             "margins 6.18, loss 0.003\n"
-            "generation unchanged\n(§3.2.5)",
+            "generation unchanged\n(§1.3)",
             fill=DEAD_GREY, fs=8, dashed=True, tcolor=TEXT_GREY)
 
         # ── left lane: Layer 1 training ───────────────────────────
@@ -147,7 +153,7 @@ def main() -> None:
         arrow(ax, 38, 64.2, 38, 60)
         box(ax, 38, 56.5, 32, 6,
             "adapters/qwen-injection-{sft, grpo}\n"
-            "86 MB each  —  §4.8 compares them:\n"
+            "86 MB each  —  §1.3 compares them:\n"
             "refusal  SFT 86.8%  vs  GRPO 50.0%",
             fill=LAYER1_BLUE, fs=8.5)
 
@@ -179,7 +185,7 @@ def main() -> None:
             "no training · no GPU",
             fill=PROMPT_BLUE, fs=8.5)
         arrow(ax, 20, 37.5, 30, 33.5, connectionstyle="arc3,rad=-0.15")
-        label(ax, 18.5, 33.5, "never trained,\nnever measured until T12",
+        label(ax, 14, 33, "never trained,\nnever measured until the audit",
               color=TEXT_GREY, fs=7.5, ha="center")
 
         arrow(ax, 57, 40.5, 57, 35.5)
@@ -201,8 +207,8 @@ def main() -> None:
         # ── STAGE G: the self-audit ───────────────────────────────
         box(ax, 50, 15.5, 74, 9.5,
             "STAGE G  ·  Self-audit  (p0_analysis.md)\n"
-            "audit_report_numbers.py 86/86   ·   audit_p0_numbers.py 79/79   ·   "
-            "T8 / T9 / T12 closed\n\n"
+            "8 instrument defects found (§2.1)   ·   "
+            "every number re-checked by audit_report_numbers.py + audit_p0_numbers.py\n\n"
             "RETRACTED  agent-retry paradox (p=0.39)   ·   loose > strict verifier (p=0.50)\n"
             "HELD  GRPO reward hacking   ·   DPO structural failure        "
             "NEW  prompt-only 0.0% ASR",
@@ -213,8 +219,8 @@ def main() -> None:
         # ── STAGE H: outputs ──────────────────────────────────────
         box(ax, 50, 3.5, 64, 4.5,
             "STAGE H  ·  Outputs\n"
-            "final_report.md (1165 lines)   ·   Streamlit demo   ·   "
-            "165 numeric claims re-checked on every run",
+            "final_report.md   ·   Streamlit demo   ·   "
+            "defect #1 (the LLM judge) led to the judge study in §3–§8",
             fill=OUTPUT_TAN, fs=9)
 
         fig.savefig(OUT_DIR / "pipeline_v2.png", dpi=120, bbox_inches="tight",
