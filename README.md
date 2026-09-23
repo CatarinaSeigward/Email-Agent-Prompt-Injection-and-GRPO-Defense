@@ -1,10 +1,7 @@
 # Email Agent Red-Team & Defense
 
 > **Can someone hijack your AI assistant just by sending you an email?**
-> I built one, attacked it, defended it three ways — and then found that the hardest part
-> wasn't building the defense. It was trusting the number that said the defense worked.
-> Following that thread out of my own project ended somewhere I didn't expect: at the
-> question of how far an LLM judge's score can be trusted when a red-team search uses it
+> I built one, attacked it, defended it three ways — and then found that the hardest part wasn't building the defense. It was trusting the number that said the defense worked. Following that thread out of my own project ended somewhere I didn't expect: at the question of how far an LLM judge's score can be trusted when a red-team search uses it
 > to decide which attacks to keep.
 
 [![audit: 189/189 + 79/79](https://img.shields.io/badge/audit-189%2F189%20%2B%2079%2F79-brightgreen)](scripts/audit_report_numbers.py) [![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](#license) [![demo: live](https://img.shields.io/badge/demo-live-FF4B4B?logo=streamlit&logoColor=white)](https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/)

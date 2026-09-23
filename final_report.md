@@ -1,6 +1,6 @@
 # Measuring the Ruler: Checking LLM-Judge Red-Team Scores Against What the Agent Actually Did
 
-> **Kaiwen Lin** · `kaiwenlin@utexas.edu` · MIT (code) / CC BY 4.0 (report)
+> **Kaiwen Lin** · `kaiwenlin@utexas.edu` 
 > **Live demo**: <https://email-agent-prompt-injection-and-grpo-defense-ad4wjkqkxk2vdazq.streamlit.app/>
 
 ---
