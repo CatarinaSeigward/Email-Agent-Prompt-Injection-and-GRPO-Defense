@@ -125,7 +125,10 @@ def main() -> None:
         above = sum(1 for x in lens if x > REPLY_EXFIL_MIN_BODY)
         stats = {"n": len(lens), "min": lens[0], "median": lens[len(lens) // 2],
                  "max": lens[-1], "above_threshold": above,
-                 "frac_above": round(above / len(lens), 4)}
+                 "frac_above": round(above / len(lens), 4),
+                 # Every length, sorted, so the demo can draw the distribution
+                 # the cutoff sits in rather than just its summary.
+                 "values": lens}
         out["body_lengths"][name] = stats
         print(f"\n  {name}: external send_reply bodies")
         print(f"    n={stats['n']}  min={stats['min']}  median={stats['median']}  "

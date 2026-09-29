@@ -27,7 +27,14 @@ Run: uv run python docs/diagrams/make_concept_v2.py
 Section references follow final_report.md as renumbered on 2026-09-21. They were
 updated on 2026-09-22; until then the figure cited §4.9, §7.7 and §9.1, which no
 longer exist. The adaptive-attack caveat was updated at the same time, because
-the adaptive attack it said was missing has since been run (§1.2).
+the adaptive attack it said was missing has since been run (§1.2). Later the
+same day the caveat and the DEFENSE 0 box were rewritten again after the
+task-completion check (scripts/task_completion.py): under attack the hardened
+agent handled none of the 25 legitimate emails, so the box no longer claims it
+"draws a trust boundary" and the caveat says what its 0% mostly reflects.
+When final_report.md was then cut to a short version, the section references
+were removed from the figure altogether, so it cannot go stale again. (The
+notes above still use the numbering of the time.)
 """
 
 from __future__ import annotations
@@ -114,7 +121,7 @@ def main() -> None:
         # Defense 0 — the system prompt (best measured result, §1.2)
         box(ax, 33, 54, 38, 6.5,
             "DEFENSE 0 · system prompt   (no training, no GPU)\n"
-            "draws a trust boundary: obey the user, ignore the inbox",
+            "email is data: ask the user before acting on what it says",
             fill=PROMPT_BLUE, fs=8.5)
         arrow(ax, 33, 61.5, 33, 57.5)
         label(ax, 34.5, 59.5, "which prompt is installed?", fs=7.5)
@@ -174,21 +181,21 @@ def main() -> None:
         ax.text(px + 38, 29, "76.7%", fontsize=9.5, ha="right", va="top", family="monospace")
 
         ax.text(px, 24.5,
-                "Naive varies by ±12.1 pp between identical replays (§1.2).\n"
+                "Naive varies by ±12.1 pp between identical replays.\n"
                 "GATE 1 / GATE 2 ran once each, and 38 attacks can't\n"
-                "separate them, so they are not ranked here (§2.4).",
+                "separate them, so they are not ranked here.",
                 fontsize=7.5, color=TEXT_GREY, ha="left", va="top")
 
         ax.text(px, 13.5,
-                "Caveat: these attacks were written against the naive\n"
-                "prompt. An adaptive attacker shown DEFENSE 0 verbatim\n"
-                "also cracked 0 of 30 seeds, but the 95% bound is 9.5% (§1.2).",
+                "Caveat: under attack, DEFENSE 0 also answered 0 of the\n"
+                "25 normal emails. It lists them and asks the user, so its\n"
+                "0% is mostly not acting, not telling orders from data.",
                 fontsize=7.5, color=ATTACK_RED, ha="left", va="top")
 
         # ── bottom note: §2.5 replacement finding (not the retracted one) ──
         ax.text(
             50, 4.5,
-            "A blocked call is not a retry: the agent sweeps every email once, so the attacker gets B = |inbox| attempts in all six configurations (§2.5).",
+            "A blocked call is not a retry: the agent sweeps every email once, so the attacker gets B = |inbox| attempts in all six configurations.",
             ha="center", fontsize=8.5, style="italic", color=TEXT_GREY,
         )
         ax.text(

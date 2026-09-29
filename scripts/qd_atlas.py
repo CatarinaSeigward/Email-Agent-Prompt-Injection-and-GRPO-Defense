@@ -197,7 +197,7 @@ def verdict_sentence(targets, entries: list[dict], level: int) -> str:
 def error_type(oracle_level: int, judge_level: int, reason: str,
                targets, entries: list[dict]) -> str | None:
     """Why a judge disagreed with the ground truth, by deterministic rule.
-    Only shown in the demo if the rules pass the gate against hand labels."""
+    Only shown in the demo if the rules pass the gate against the labelled cases."""
     if (oracle_level > 0) == (judge_level > 0):
         return None
     if oracle_level > 0:
@@ -484,7 +484,7 @@ def load_labels(path: Path, cands: list[dict]) -> dict:
 
 
 def gate(cands: list[dict], labels_path: Path = LABELS) -> dict:
-    """Compare rule output against hand labels. Types are shown in the demo only
+    """Compare rule output against the labelled cases. Types are shown in the demo only
     if the rules clear BOTH raw agreement >= GATE and Cohen's kappa >= KAPPA_GATE;
     otherwise only the raw judge reasons are shown.
 
@@ -493,7 +493,7 @@ def gate(cands: list[dict], labels_path: Path = LABELS) -> dict:
     passed by a rule that always guesses the majority -- the same vacuous-metric
     failure as F1 = 1.00 at every threshold (final_report 4.4)."""
     if not labels_path.exists():
-        return {"enabled": False, "reason": f"no hand labels at {labels_path.name}",
+        return {"enabled": False, "reason": f"no labels at {labels_path.name}",
                 "n": 0, "agreement": None}
     labels = load_labels(labels_path, cands)
     by = {c["id"]: c for c in cands}
@@ -709,7 +709,7 @@ def main() -> None:
     ap.add_argument("--label-sheet", type=Path, default=None,
                     help="write a labelling sheet (.md) and fill-in template (.json)")
     ap.add_argument("--labels", type=Path, default=LABELS,
-                    help="which hand-labels file the error-type gate uses")
+                    help="which labels file the error-type gate uses")
     ap.add_argument("--compare-labels", type=Path, nargs=2, metavar=("A", "B"),
                     help="agreement between two labellers; writes nothing")
     args = ap.parse_args()

@@ -17,7 +17,7 @@ RESULTS = REPO / "results"
 DATA = REPO / "data"
 
 # Defense configurations the demo can load, in display order.
-# The p0_* entries are the k=3 replicate runs behind report §1.2; r1 is shown
+# The p0_* entries are the k=3 replicate runs behind report §2.1; r1 is shown
 # because every replicate has the same 38 rows and the picker only needs one.
 ATTACK_LABELS = [
     "p0_naive_r1",
@@ -32,7 +32,7 @@ ATTACK_LABELS = [
 BENIGN_LABELS = ATTACK_LABELS  # symmetric
 
 # The replay tab offers only these. `baseline` duplicates the naive prompt, and
-# the `_loose` variants belong to a comparison the report retracted (§2.5).
+# the `_loose` variants belong to a comparison the report retracted (§3.2).
 REPLAY_LABELS = ["p0_naive_r1", "p0_hardened_r1", "guard", "verifier_only", "combined"]
 
 DISPLAY_NAME = {
@@ -74,7 +74,7 @@ def load_benign(label: str) -> dict:
 def load_result(name: str) -> dict | None:
     """Load an arbitrary `results/{name}.json`, or None if it has not been generated.
 
-    Used for the audit and judge artefacts (report §2–§8), which are produced by
+    Used for the audit and judge artefacts (report §3–§4), which are produced by
     the `scripts/*.py` drivers rather than by training. Returning None lets the
     page degrade to a "not generated" note instead of crashing.
     """

@@ -24,10 +24,6 @@ The four tabs follow the story in the order it happened.
    defenses, how RL training made the model refuse less (with a viewer for individual
    completions), the four most important problems the self-audit found, and what I took
    back.
-
-Every tab opens with the same collapsed glossary, *Terms used in this project*, which
-defines each specialist term that appears anywhere in the demo, so a reader with general
-ML background can follow any tab without leaving it.
 2. **Checking the judges.** Why LLM-judge scores matter beyond this project, how my own
    ground truth had to be fixed twice, and the three findings: the judges disagree about
    partial credit, the gap settles instead of growing during a search, and how well each
@@ -40,9 +36,13 @@ ML background can follow any tab without leaving it.
    default pairing, naive against hardened prompt, shows the one result no scoring choice
    can change: zero destructive calls.
 
+The first three tabs open with the same collapsed glossary, *Terms used in this project*,
+which defines each specialist term that appears in the demo, so a reader with general ML
+background can follow them without leaving the page. The replay tab leaves it out.
+
 The statistics behind each claim (power calculations, the classifier threshold sweep,
 variance estimates, the full ledger of retractions) stay in the report rather than on the
-page. Each tab links to it.
+page. The first two tabs link to it.
 
 ## Deploy to Streamlit Community Cloud
 

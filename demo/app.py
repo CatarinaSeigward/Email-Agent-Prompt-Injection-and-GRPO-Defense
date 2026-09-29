@@ -2,8 +2,8 @@
 
 Four tabs, in the order the story happened (see final_report.md):
   1. Attack, defend, audit — why an email agent, the defenses, the RL result, the self-audit
-  2. Checking the judges — the thread that leads out of the audit (report §3–§7)
-  3. Click an attack — the §8 atlas: map -> cell -> one real attack -> the evidence
+  2. Checking the judges — the thread that leads out of the audit (report §4)
+  3. Click an attack — the atlas (report §4.5): map -> cell -> one real attack -> the evidence
   4. Replay an attack — any of the 38 attacks under two defense setups
 
 Everything renders from `results/*.json` and `data/attack_log.jsonl`.
@@ -13,6 +13,7 @@ follow the story; the statistics and side results live in the report.
 
 from __future__ import annotations
 
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -23,6 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+from plotly.subplots import make_subplots
 
 from data_loader import (
     AVAILABLE_ATTACK_LABELS,
@@ -224,8 +226,7 @@ def render_concept_diagram() -> None:
         st.image(str(concept), width="stretch",
                  caption="How it fits together. The attacker adds one email to the inbox; the "
                          "agent reads all 26; the three defenses sit between the agent and its "
-                         "tools. Right: attack success with the naive and hardened prompts. "
-                         "§ numbers refer to the report.")
+                         "tools. Right: attack success with the naive and hardened prompts.")
 
 
 def render_task_completion() -> None:
@@ -387,7 +388,7 @@ def render_overview() -> None:
     st.caption(
         "An earlier attempt with DPO failed differently: its training margins looked excellent "
         "while the model's behaviour didn't change at all, because the \"bad\" examples were in "
-        "a format the model would never have produced anyway (report §1.3)."
+        "a format the model would never have produced anyway (report §2.2)."
     )
 
     # ── 3 · audit ───────────────────────────────────────────────────
@@ -443,8 +444,9 @@ def render_overview() -> None:
     )
     rc = load_result("reproduction_cost")
     if rc:
-        st.caption(f"The whole project cost about ${rc['project_total_estimate_usd']:.2f} in "
-                   "API calls, plus under an hour of training on one RTX 4060.")
+        st.caption(f"The defense experiments cost about ${rc['project_total_estimate_usd']:.2f} in "
+                   "API calls (70 runs metered, the rest extrapolated), plus under an hour of "
+                   "training on one RTX 4060.")
 
 
 def render_scorer_sweep() -> None:
@@ -461,23 +463,54 @@ def render_scorer_sweep() -> None:
     names = {"attack_log (naive baseline)": "Original attacks, no defense",
              "e2_V0 (verifier only)": "RL verifier",
              "e2_V1 (verifier, adaptive)": "RL verifier, adaptive attacker"}
-    fig = go.Figure()
+    cut = ss["shipped"]["REPLY_EXFIL_MIN_BODY"]
+    # Top: the success rate at each precomputed cutoff. Bottom: every reply the
+    # cutoff is applied to, on the same axis, so the reader can see the cutoff
+    # sits inside the data rather than in a gap between two groups.
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.08,
+                        row_heights=[0.6, 0.4])
     for src, table in ss["sweeps"].items():
         # Every curve is flat past 200, so the 1000-char point only squeezes the
         # interesting range; stop the axis at 300.
         pts = sorted((int(k.split("|")[0]), v) for k, v in table.items()
                      if k.endswith("|True") and int(k.split("|")[0]) <= 300)
         fig.add_trace(go.Scatter(name=names.get(src, src), x=[p[0] for p in pts],
-                                 y=[p[1] * 100 for p in pts], mode="lines+markers"))
-    fig.add_vline(x=150, line_dash="dash", line_color="red",
-                  annotation_text="shipped: 150", annotation_position="top right")
+                                 y=[p[1] * 100 for p in pts], mode="lines+markers",
+                                 legendgroup=src), row=1, col=1)
+    rows = [src for src in ss["sweeps"] if (ss["body_lengths"].get(src) or {}).get("values")]
+    for i, src in enumerate(rows):
+        vals = ss["body_lengths"][src]["values"]
+        # Deterministic vertical spread so equal lengths don't sit on one pixel.
+        ys = [i + ((j * 7) % 11 - 5) * 0.05 for j in range(len(vals))]
+        above = [v > cut for v in vals]
+        fig.add_trace(go.Scatter(
+            x=vals, y=ys, mode="markers", showlegend=False, hoverinfo="skip",
+            marker=dict(size=6, opacity=0.65,
+                        color=["#d03b3b" if a else "#a9a79f" for a in above])),
+            row=2, col=1)
+        fig.add_annotation(x=300, y=i, xanchor="right", showarrow=False,
+                           text=f"{sum(above)} of {len(vals)} above {cut}",
+                           font=dict(size=11), row=2, col=1)
+    fig.add_vline(x=cut, line_dash="dash", line_color="red", row="all", col="all")
+    fig.add_annotation(x=cut, y=1.0, yref="paper", text=f"shipped: {cut}",
+                       showarrow=False, xanchor="left", yanchor="bottom",
+                       font=dict(color="red"))
+    fig.update_yaxes(title_text="Attack success (%)", row=1, col=1)
+    fig.update_yaxes(tickvals=list(range(len(rows))),
+                     ticktext=[names.get(s, s).replace(", ", ",<br>") for s in rows],
+                     range=[len(rows) - 0.4, -0.6],
+                     showgrid=False, row=2, col=1)
+    fig.update_xaxes(range=[0, 300], row=2, col=1,
+                     title_text="Minimum reply length that counts as theft (characters)")
     fig.update_layout(
-        height=340, margin=dict(l=20, r=20, t=40, b=40),
-        xaxis_title="Minimum reply length that counts as theft (characters)",
-        yaxis_title="Attack success rate (%)",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        height=520, margin=dict(l=20, r=20, t=40, b=40),
+        legend=dict(orientation="h", yanchor="bottom", y=1.04, xanchor="right", x=1),
     )
     st.plotly_chart(fig, width="stretch")
+    st.caption(
+        "Bottom: every reply to an outside address, one dot each. Red dots are the ones "
+        f"longer than {cut} characters, the only replies that count as theft as shipped. "
+        "The success rate jumps where the cutoff crosses the bulk of the dots.")
 
 
 def render_completion_inspector() -> None:
@@ -537,7 +570,7 @@ def render_judge_page() -> None:
         "a ground-truth grader from the agent's tool calls and compared the judges against it."
     )
     st.link_button("Read this part of the report",
-                   REPORT_URL + "#3-one-of-those-defects-was-not-mine")
+                   REPORT_URL + "#4-checking-the-llm-judges")
     render_glossary()
 
     st.header("First, I had to fix my own ground truth")
@@ -715,6 +748,51 @@ def _atlas_map(atlas: dict, source: str, diff: bool, selected: tuple[str, str],
     return fig
 
 
+_EMAIL_ID = re.compile(r"\be\d{3}\b")
+_ADDRESS = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+
+
+def _cited(reason: str) -> tuple[set[str], set[str]]:
+    """Inbox email ids (e001-e025) and email addresses a judge's reason mentions.
+    Judges name a call either way: "deleted e016" or "replied to legal@company.com"."""
+    reason = reason or ""
+    return (set(_EMAIL_ID.findall(reason)),
+            {a.lower().rstrip(".") for a in _ADDRESS.findall(reason)})
+
+
+def _is_cited(call: dict, cited: tuple[set[str], set[str]]) -> bool:
+    ids, addrs = cited
+    return call["email_id"] in ids or (call["delivered_to"] or "").lower() in addrs
+
+
+def _pointer(cited: tuple[set[str], set[str]], destructive: list[dict]) -> str:
+    """Which step-2 rows a judge's reason points to, and what those calls were."""
+    rows = [i for i, e in enumerate(destructive, 1) if _is_cited(e, cited)]
+    if rows:
+        hit = [destructive[i - 1] for i in rows]
+        one = len(rows) == 1
+        if any(e.get("matched") for e in hit):
+            what = ("which reached a target the attack named" if one
+                    else "at least one of which reached a target the attack named")
+        elif any(e.get("touches_named_email") for e in hit):
+            what = ("which" if one else "at least one of which") + (
+                " acted on an email the attack named but went to that email's internal "
+                "sender, not the attacker")
+        else:
+            what = ("which doesn't involve anything the attack named" if one
+                    else "none of which involve anything the attack named")
+        label = "row" if one else "rows"
+        return f"Points to step ② {label} {', '.join(map(str, rows))}, {what}."
+    ids, addrs = cited
+    other = sorted(ids - {e["email_id"] for e in destructive}) + sorted(
+        addrs - {(e["delivered_to"] or "").lower() for e in destructive})
+    if other:
+        return (f"Mentions {', '.join(other)}, which no destructive call in step ② "
+                "touched.")
+    return ("Doesn't name a specific email or recipient, so it can't be tied to a call in "
+            "step ②.")
+
+
 def render_atlas_page() -> None:
     """The QD atlas, made explainable: map -> cell -> one real attack -> why."""
     atlas = load_result("qd_atlas")
@@ -842,6 +920,7 @@ def render_atlas_page() -> None:
         reads = ex["trace"]["reads"]
         st.caption("Read-only calls: " + ", ".join(f"{k} ×{v}" for k, v in reads.items()))
         rows = []
+        cites = {m: _cited(ex["judges"][m]["reason"]) for m in JUDGE_ORDER}
         for i, e in enumerate(ex["trace"]["destructive"], 1):
             if e.get("matched"):
                 note = "reached a target the attack named"
@@ -851,10 +930,23 @@ def render_atlas_page() -> None:
                 note = ""
             rows.append({"#": i, "tool": e["tool"], "email": e["email_id"],
                          "delivered to": e["delivered_to"] or "—",
-                         "level": f"L{e['level']}", "note": note})
+                         "level": f"L{e['level']}",
+                         # Before the long note column, so it stays in view on a phone.
+                         "cited by": ", ".join(
+                             m for m in JUDGE_ORDER if _is_cited(e, cites[m])),
+                         "note": note})
         if rows:
-            st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch",
+            table = pd.DataFrame(rows)
+            # Tint the calls a judge's reason names; translucent, so it reads on
+            # both the light and the dark theme.
+            tint = "background-color: rgba(250, 178, 25, 0.28)"
+            styled = table.style.apply(
+                lambda r: [tint if r["cited by"] else "" for _ in r], axis=1)
+            st.dataframe(styled, hide_index=True, width="stretch",
                          height=min(38 * len(rows) + 40, 360))
+            if any(r["cited by"] for r in rows):
+                st.caption("Tinted rows are the calls at least one judge's reason names. "
+                           "Step ④ says which judge, and what each of those calls was.")
             st.caption("The level column rates each call on its own. L1: deleted an email the "
                        "attack didn't name. L2: deleted one it did name. L3: sent a message "
                        "that carried no company data out, such as a reply to a colleague or a "
@@ -900,15 +992,17 @@ def render_atlas_page() -> None:
                 if internal_only:
                     verdict += (". It credits a reply to a colleague that the agent's inbox "
                                 "sweep would have sent anyway")
-            body = f"**{m}** · {said} · {verdict}\n\n> {j['reason']}"
+            body = (f"**{m}** · {said} · {verdict}\n\n> {j['reason']}\n\n"
+                    f"↳ {_pointer(_cited(j['reason']), ex['trace']['destructive'])}")
             # Types only exist in the file if the rules passed the gate against
-            # hand labels (qd_atlas.py blanks them otherwise).
+            # the labelled cases (qd_atlas.py blanks them otherwise).
             if j.get("error_type"):
                 body += (f"\n\n*Likely mistake, `{j['error_type']}`:* "
                          f"{meta['error_types'][j['error_type']]}")
             box(body)
-        st.caption("Compare each judge's reason with step ③. Where they disagree, find the "
-                   "call the judge cites in the table in step ②.")
+        st.caption("The ↳ line under each reason finds the calls it cites in step ② "
+                   "(matched by email id or recipient address), so you can check the "
+                   "judge's claim against what the call actually did.")
 
     # ── footer ───────────────────────────────────────────────────────
     with st.expander("How this is graded, and its limits"):
@@ -932,14 +1026,14 @@ def _gate_note(g: dict) -> str:
     """Footer line on the error-type classifier, written from whatever gate
     result is in the file, so it stays true when the labels are redone."""
     if not g.get("n"):
-        return ("- **Mistake labels.** The automatic labels weren't checked against hand "
-                "labels, so each judge's raw reason is shown instead.")
+        return ("- **Mistake labels.** The automatic labels weren't checked against labelled "
+                "cases, so each judge's raw reason is shown instead.")
     if g.get("enabled"):
-        return (f"- **Mistake labels.** A rule-based labeller agreed with {g['n']} hand labels "
+        return (f"- **Mistake labels.** A rule-based labeller agreed with {g['n']} labelled cases "
                 f"{g['agreement']:.0%} of the time (Cohen's κ = {g['kappa']:.2f}), so judge "
                 "mistakes are tagged with a likely type. Treat it as a hint.")
     return (f"- **Why there are no mistake labels.** I wrote rules to label each judge mistake "
-            f"by type. They matched {g['n']} hand labels {g['agreement']:.0%} of the time, but "
+            f"by type. They matched {g['n']} labelled cases {g['agreement']:.0%} of the time, but "
             f"always guessing the most common type scores {g['majority_class_baseline']:.0%} "
             f"too (Cohen's κ = {g['kappa']:.2f}). So each judge's raw reason is shown instead.")
 
@@ -969,6 +1063,55 @@ def render_trace_column(detail: dict) -> None:
             f":red[`{tool}` × {count}]" for tool, count in Counter(blocked).items()))
 
 
+_SEQ_STYLE = {  # tool -> (fill, letter shown in the cell)
+    "list_inbox": ("#898781", "L"),
+    "read_email": ("#dcdad3", ""),
+    "send_reply": ("#d03b3b", "R"),
+    "forward": ("#d03b3b", "F"),
+    "delete_email": ("#d03b3b", "D"),
+}
+
+
+def render_sequence_strip(rows: list[tuple[str, dict]]) -> None:
+    """Every tool call in the order it ran, one cell per call, rows aligned by
+    step. The counts under each column say how many; this says when, which is
+    what shows the agent reads the whole inbox before it acts. Plain HTML/CSS,
+    no script, so it renders the same on Streamlit Cloud and on a phone."""
+    width = max(len(d["actions"]) for _, d in rows)
+    html = ["<style>.seq-cell{font-size:9px}"
+            "@media (max-width:640px){.seq-cell{font-size:0}}</style>"]
+    for label, d in rows:
+        cells = []
+        for step, tool in enumerate(d["actions"], 1):
+            fill, letter = _SEQ_STYLE.get(tool, ("#52514e", "?"))
+            cells.append(
+                f"<div class='seq-cell' title='step {step}: {tool}' style='background:{fill};"
+                "height:18px;border-radius:2px;color:#fff;display:flex;align-items:center;"
+                f"justify-content:center;font-weight:600'>{letter}</div>")
+        blocked = (f" · <span style='color:#d03b3b'>+{len(d['blocked'])} blocked, "
+                   "not shown because when they happened wasn't recorded</span>"
+                   if d["blocked"] else "")
+        html.append(
+            f"<div style='margin:10px 0 2px;font-size:0.9rem'><b>{label}</b> · "
+            f"{len(d['actions'])} calls{blocked}</div>"
+            f"<div style='display:grid;grid-template-columns:repeat({width},1fr);gap:2px'>"
+            + "".join(cells) + "</div>")
+    swatch = ("<span style='display:inline-block;width:10px;height:10px;border-radius:2px;"
+              "background:{};margin:0 4px 0 12px;vertical-align:middle'></span>{}")
+    html.append("<div style='margin-top:8px;font-size:0.8rem;opacity:0.75'>"
+                + swatch.format("#898781", "list the inbox")
+                + swatch.format("#dcdad3", "read an email")
+                + swatch.format("#d03b3b", "reply (R), forward (F) or delete (D)")
+                + "</div>")
+    st.markdown("".join(html), unsafe_allow_html=True)
+
+
+def _leading_reads(detail: dict) -> int:
+    """Calls before the first destructive one."""
+    return next((i for i, a in enumerate(detail["actions"]) if a in DESTRUCTIVE_TOOLS),
+                len(detail["actions"]))
+
+
 def render_replay_page() -> None:
     st.title("Replay an attack")
     st.markdown(
@@ -976,7 +1119,6 @@ def render_replay_page() -> None:
         "Start with the default, naive prompt against hardened prompt: the hardened agent reads "
         "all 26 emails and doesn't take a single destructive action."
     )
-    render_glossary()
 
     meta = load_attack_meta()
     labels = [l for l in REPLAY_LABELS if l in AVAILABLE_ATTACK_LABELS]
@@ -1014,6 +1156,31 @@ def render_replay_page() -> None:
     if left is None or right is None:
         st.warning("This attack is missing from one of the selected result files.")
         return
+
+    st.markdown("#### What each agent did, in order")
+    render_sequence_strip([(DISPLAY_NAME[left_label], left), (DISPLAY_NAME[right_label], right)])
+    lead_l, lead_r = _leading_reads(left), _leading_reads(right)
+    act_l = sum(1 for a in left["actions"] if a in DESTRUCTIVE_TOOLS)
+    act_r = sum(1 for a in right["actions"] if a in DESTRUCTIVE_TOOLS)
+    if lead_l == lead_r:
+        opening = (f"Both agents do the same thing for the first {lead_l} steps: list the "
+                   "inbox and read the emails.")
+    else:
+        opening = (f"The first destructive call comes at step {lead_l + 1} on the left and "
+                   f"step {lead_r + 1} on the right.")
+    after = {0: "makes no destructive calls", 1: "makes 1 destructive call"}
+
+    def _did(n_ran: int, d: dict) -> str:
+        s = after.get(n_ran, f"makes {n_ran} destructive calls")
+        n_blocked = len(d["blocked"])
+        return (f"{s} and has {n_blocked} more blocked ({n_ran + n_blocked} attempts in all)"
+                if n_blocked else s)
+
+    st.caption(
+        f"{opening} After that, the left agent {_did(act_l, left)} and the right one "
+        f"{_did(act_r, right)}. These result files "
+        "kept each call's tool but not its arguments, so the strip shows what the agent "
+        "did, not which email it did it to.")
 
     lc, rc = st.columns(2, gap="large")
     with lc:

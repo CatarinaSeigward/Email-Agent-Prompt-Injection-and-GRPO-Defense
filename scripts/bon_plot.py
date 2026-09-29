@@ -49,6 +49,44 @@ def _grid(ax, axis="x"):
     ax.set_axisbelow(True)
 
 
+def _place_labels(fig, ax, xs, ys, names) -> None:
+    """Label each point at the first of a few offsets that overlaps neither an
+    earlier label nor another point. A fixed up-right offset put three judges'
+    names on top of each other where their points cluster."""
+    from matplotlib.transforms import Bbox
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    r = 6  # half-size of a marker's keep-out box, in display pixels
+    points = [ax.transData.transform((x, y)) for x, y in zip(xs, ys)]
+    taken = [Bbox([[px - r, py - r], [px + r, py + r]]) for px, py in points]
+    inside = ax.get_window_extent(renderer)
+    # The first spot sits right next to the point. The others are further out and
+    # get a hairline leader, so a displaced name can't be read as its neighbour's.
+    candidates = [(6, 4, "left", "bottom"), (14, -12, "left", "top"),
+                  (-14, 12, "right", "bottom"), (-14, -12, "right", "top"),
+                  (0, 16, "center", "bottom"), (0, -16, "center", "top")]
+    for i, (x, y, name) in enumerate(zip(xs, ys, names)):
+        own = taken[i]
+        chosen = None
+        for k, (dx, dy, ha, va) in enumerate(candidates):
+            leader = None if k == 0 else dict(arrowstyle="-", color=MUTED, lw=0.6,
+                                              shrinkA=1, shrinkB=4)
+            label = ax.annotate(name, (x, y), xytext=(dx, dy), textcoords="offset points",
+                                ha=ha, va=va, color=INK_2, fontsize=7.5,
+                                arrowprops=leader)
+            box = label.get_window_extent(renderer)
+            clear = (not any(box.overlaps(o) for o in taken if o is not own)
+                     and inside.contains(box.x0, box.y0) and inside.contains(box.x1, box.y1))
+            if clear:
+                chosen = label
+                break
+            label.remove()
+        if chosen is None:  # nothing clear: fall back to the default spot
+            chosen = ax.annotate(name, (x, y), xytext=(6, 4), textcoords="offset points",
+                                 color=INK_2, fontsize=7.5)
+        taken.append(chosen.get_window_extent(renderer))
+
+
 def efficiency_figure(c: dict, out: Path) -> None:
     judges = sorted(c["meta"]["judges"], key=lambda m: c["efficiency"][m]["32"])
     eff = [c["efficiency"][m]["32"] for m in judges]
@@ -83,9 +121,6 @@ def efficiency_figure(c: dict, out: Path) -> None:
     # (b) static calibration vs selection efficiency
     b.plot(oc, eff, "o", color=ACCENT, markersize=7,
            markeredgecolor=SURFACE, markeredgewidth=1.5, zorder=3)
-    for x_, y_, m in zip(oc, eff, judges):
-        b.annotate(m, (x_, y_), xytext=(5, 4), textcoords="offset points",
-                   color=INK_2, fontsize=7.5)
     b.margins(x=0.22, y=0.15)          # room for the longest judge name
     hb = c["H-B"]
     b.set_xlabel("over-credit at n = 1  (judge success rate − oracle)")
@@ -95,6 +130,8 @@ def efficiency_figure(c: dict, out: Path) -> None:
     _grid(b, "both")
 
     fig.tight_layout()
+    # After the layout is final, so the overlap test sees the real positions.
+    _place_labels(fig, b, oc, eff, judges)
     fig.savefig(out, dpi=200)
     plt.close(fig)
 
