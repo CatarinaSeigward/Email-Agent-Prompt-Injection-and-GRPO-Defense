@@ -23,6 +23,7 @@ Output: data/grpo_prompts.jsonl
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import random
@@ -32,9 +33,25 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 LOG_PATH = DATA_DIR / "attack_log.jsonl"
 OUT_PATH = DATA_DIR / "grpo_prompts.jsonl"
 
-BASE_MODEL = os.environ.get("GRPO_BASE_MODEL", "Qwen/Qwen2.5-0.5B-Instruct")
+# Only the chat template is used here. Qwen2.5-0.5B- and 1.5B-Instruct ship the
+# identical template (sha256 cd8e9439f057...), so this default matching the
+# trained model changes no rendered prompt.
+BASE_MODEL = os.environ.get("GRPO_BASE_MODEL", "Qwen/Qwen2.5-1.5B-Instruct")
 
 _TOKENIZER = None
+
+
+def stable_seed(*parts) -> int:
+    """A 32-bit RNG seed that is the same in every process.
+
+    The built-in hash() salts str per process (PYTHONHASHSEED), so a seed taken
+    from hash((seed_id, round, ...)) changes from run to run. That is how
+    data/grpo_prompts.jsonl was drawn: the saved file is what training used,
+    but rerunning build_prompts() could never reproduce it. sha256 over the
+    repr has no salt.
+    """
+    digest = hashlib.sha256(repr(parts).encode("utf-8")).digest()
+    return int.from_bytes(digest[:4], "big")
 
 
 def _get_tokenizer():
@@ -73,9 +90,9 @@ def build_prompts(
 
     Args:
         inbox_variants: how many inbox-shuffle variants to emit per row.
-            3 is a good default — 27 judge-success + ~33 near-miss rows
-            × 3 ≈ 180 prompts, which gives GRPO enough optimizer steps
-            (~22/epoch at grad_accum=8) to converge in 2 epochs.
+            With the 38 rows of attack_log.jsonl, 3 variants give the 114
+            prompts training used: about 29 optimizer steps per epoch at
+            4 prompts per step (batch 2 x grad_accum 8 = 16 completions, G=4).
         inbox_sample_size: how many inbox emails to put in each prompt's
             "Inbox snapshot" section. 6 keeps prompts under ~700 tokens.
         include_near_miss: include judge.success==False rows. These are
@@ -110,8 +127,9 @@ def build_prompts(
         attack = row["attack_email"]
         for variant_i in range(inbox_variants):
             # Deterministic per-(row, variant) shuffle so re-runs produce
-            # identical datasets.
-            rng = random.Random(hash((row["seed_id"], row.get("round", 0), variant_i)) & 0xFFFFFFFF)
+            # identical datasets. Regenerating now gives a different set from
+            # the saved file, which was drawn with the salted hash().
+            rng = random.Random(stable_seed(row["seed_id"], row.get("round", 0), variant_i))
             k = min(inbox_sample_size, len(candidates))
             sampled = rng.sample(candidates, k=k)
             inbox_summary = "\n".join(

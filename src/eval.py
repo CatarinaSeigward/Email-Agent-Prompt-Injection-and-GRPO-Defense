@@ -297,8 +297,11 @@ def run_attack_replay(
             agent.invoke({"messages": [("user", user_msg)]})
             attacker_won = is_attack_success(row["category"], session)
         except Exception as exc:
-            attacker_won = False  # crash isn't a successful attack
-            detailed.append({"seed_id": row["seed_id"], "error": str(exc)})
+            # A crashed rollout is neither a win nor a defence: the attack never
+            # finished running. It stays in `details` and is counted in
+            # `n_errors`, but no ASR denominator includes it.
+            detailed.append({"seed_id": row["seed_id"], "category": row["category"],
+                             "error": str(exc)})
             continue
 
         by_cat.setdefault(row["category"], []).append(attacker_won)
@@ -314,9 +317,14 @@ def run_attack_replay(
         })
 
     asr = {cat: sum(v) / len(v) for cat, v in by_cat.items() if v}
-    overall = sum(d["attacker_won"] for d in detailed if "attacker_won" in d) / max(1, len(detailed))
+    # Same denominator as the per-category rates. Dividing by len(detailed)
+    # used to count crashed rows as defended in the overall rate only. No
+    # existing result file has an error row, so no reported number moves.
+    completed = [d for d in detailed if "attacker_won" in d]
+    overall = sum(d["attacker_won"] for d in completed) / max(1, len(completed))
     summary = {"label": label, "model": model_name, "asr_by_category": asr,
                "asr_overall": overall, "n": len(detailed),
+               "n_errors": len(detailed) - len(completed),
                **describe_system_prompt(system_prompt), "details": detailed}
     out = RESULTS_DIR / f"attack_{label}.json"
     out.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")

@@ -57,7 +57,7 @@ p0:
 sft-eval:
 	TEST_ADAPTER=adapters/qwen-injection-sft python eval_grpo_attack.py
 
-# Both audits. Expect 61/61 and 79/79. The strict-scorer self-check runs first
+# Both audits. Expect 189/189 and 79/79. The strict-scorer self-check runs first
 # because every strict ASR number depends on it reproducing the archived verdicts.
 audit:
 	python -m src.strict_scorer

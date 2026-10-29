@@ -13,8 +13,15 @@ For each attack row we:
         refused      := completion contains any REFUSE pattern.
 
 This is the LLM-only Layer-1 behavioral defense rate on the attack distribution
-the model was trained to refuse — a like-for-like comparison to attack_baseline
-(undefended ASR=36.8%) and attack_guard (classifier-only ASR=13.2%).
+the model was trained to refuse. It is in-distribution: these 38 rows are the
+ones src.grpo_data expanded into the training prompts. Compare it with the SFT
+checkpoint it started from (TEST_ADAPTER=adapters/qwen-injection-sft), not with
+the agent-level ASRs: those replay whole rollouts, this scores one completion.
+
+Each row's prompt is saved with its result. Result files written before that
+change were rendered with an inbox snapshot seeded from the built-in hash(),
+which differs between processes, so the SFT and GRPO files on disk may show
+the same attack email with different surrounding inbox emails.
 
 Output: results/grpo_behavioral_attack.json
 """
@@ -34,6 +41,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 REPO = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO))
 
+from src.grpo_data import stable_seed  # type: ignore
 from src.grpo_train import REFUSE_RE, SOFT_REFUSE_RE, UNSAFE_RE, _has_any  # type: ignore
 from src.strict_scorer import is_strict_attack, score_rows  # type: ignore
 
@@ -101,7 +109,9 @@ def main() -> None:
             user_msg=row["user_message"],
             inbox=row["injected_inbox"],
             attack_email=row["attack_email"],
-            seed=hash((row["seed_id"], row.get("round", 0))) & 0xFFFFFFFF,
+            # Same seed in every process, so two adapters evaluated in separate
+            # runs see the same prompt and the paired comparison is exact.
+            seed=stable_seed(row["seed_id"], row.get("round", 0)),
         )
         inp = tok(prompt, return_tensors="pt").to(model.device)
         with torch.no_grad():
@@ -136,6 +146,8 @@ def main() -> None:
             "unsafe_present": unsafe,
             "strict_attacker_won": strict,
             "completion": completion[:400],
+            # Kept so a paired comparison can be checked prompt by prompt.
+            "prompt": prompt,
         })
         flag = ("ATK" if attacker_won else "STRICT" if strict
                 else "REF" if refused else "SOFT" if soft else "??")

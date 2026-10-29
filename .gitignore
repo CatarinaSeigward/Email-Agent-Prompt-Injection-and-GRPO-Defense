@@ -1,32 +1,74 @@
+# This repo is a write-up plus a live demo, not a full reproduction kit.
+# Kept: the reports, the demo, all code, data/, the result JSONs that the demo
+# and scripts/audit_*.py read, and the figures the docs embed.
+# Left out: secrets and local config, private notes, model weights, backups,
+# and raw run logs, which only matter for re-running the pipeline.
+
+# --- secrets and local config ---
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.claude/
+
+# --- private working notes ---
+personaldoc/
+
+# --- python and tooling ---
 __pycache__/
 *.pyc
 *.pyo
 .venv/
 venv/
-.env
-.env.local
 *.egg-info/
 dist/
 build/
-personaldoc/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
 
-# experiment artifacts
-checkpoints/
+# --- model weights and training output ---
+# Retrain with src/sft_warmup.py, src/grpo_train.py and src/classifier.py.
 adapters/
+checkpoints/
 *.lora
+*.safetensors
 wandb/
 
-# NOTE: data/attack_log.jsonl + results/*.json + results/*.png are
-# now tracked in git so the Streamlit demo and final_report.md remain
-# reproducible from a fresh clone without re-running the pipeline.
-# Total size < 2 MB. If you regenerate via redteam.py / train scripts,
-# overwrites are expected and intentional.
+# --- GPU smoke scripts that load the unpublished adapters/ ---
+# pytest would collect them from a fresh clone and fail; the pure-logic tests
+# (test_bon.py, test_qd_archive.py) stay.
+test_grpo.py
+test_dpo.py
 
-# logs (always ignored)
+# --- backups and superseded copies ---
+*.bak
+*.orig
+
+# --- raw run logs and API caches (~45 MB) ---
+# Every number in the reports comes from the analysis JSONs kept in results/;
+# these are the per-rollout logs and judge caches those JSONs were built from.
+# Scripts that rebuild an analysis from them will not run from a fresh clone.
+results/**/*.jsonl
+results/rubric_judge_cache.json
+
+# --- generated duplicates and stale outputs ---
+# The docs embed the PNGs; docs/diagrams/make_*.py regenerate the SVG sources.
+docs/diagrams/*.svg
+# Byte-identical copies of docs/diagrams/bon_*.png, written by scripts/bon_plot.py.
+results/bon_curves.png
+results/bon_efficiency.png
+# src/plots.py output that predates the retraction in final_report.md §3.2.
+results/comparison.png
+results/headline_table.md
+
+# --- logs ---
 *.log
-out_*.log
 
-# editor
+# --- editor and OS ---
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
+desktop.ini

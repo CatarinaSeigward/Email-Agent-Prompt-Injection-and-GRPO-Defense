@@ -1,4 +1,4 @@
-"""TRL GRPO on Qwen2.5-0.5B-Instruct with rule-based reward.
+"""TRL GRPO on Qwen2.5-1.5B-Instruct (QLoRA 4-bit) with a rule-based reward.
 
 Why GRPO here, not DPO:
   DPO failed because `chosen` (natural-language refusal) and `rejected`
@@ -8,18 +8,22 @@ Why GRPO here, not DPO:
   need paired data: it samples G completions per prompt and ranks them
   by a reward function we control directly.
 
-MVP scope (4060 8GB):
-  - base = Qwen2.5-0.5B-Instruct (small enough for policy + reference
-    + G=4 rollouts without OOM, no vllm needed)
-  - LoRA r=16 (mirrors dpo_train for apples-to-apples comparison)
+As run (4060 8GB), the configuration behind results/grpo_train.json:
+  - base = Qwen2.5-1.5B-Instruct, 4-bit NF4; the run started on 0.5B,
+    which is why some comments below describe 0.5B behaviour
+  - init = the SFT adapter from src/sft_warmup.py, trained further
+    (is_trainable=True); LoRA r=16, mirrors dpo_train
   - reward = rule-based pattern matching (no LLM judge calls, $0, fast)
-  - G=4 rollouts per prompt, batch=1, grad_accum=8 → effective batch=32
-  - target ~1-2h on 4060
+  - G=4 completions per prompt; batch 2 x grad_accum 8 = 16 completions,
+    i.e. 4 prompts per optimizer step; 114 prompts x 3 epochs is about
+    86 steps, ~31 min
+  - no vllm (won't fit in 8GB alongside the policy)
 
-NOT in scope for MVP:
-  - vllm-backed generation (won't fit in 8GB alongside policy+ref)
-  - LLM-as-judge reward (slower, costs API credits)
-  - eval pipeline integration (needs verified tool_call output first)
+Known limitation, see final_report.md §2.2: no ref_model is passed and the
+policy is a PeftModel, so TRL uses the base model with the adapter disabled
+as the KL reference, not the SFT checkpoint the policy starts from. Merging
+the SFT adapter into the base before attaching a fresh LoRA would make the
+reference the SFT model.
 
 Outputs:
   adapters/qwen-injection-grpo/  → LoRA adapter
@@ -74,9 +78,10 @@ UNSAFE_PATTERNS = [
 ]
 
 # Refusal = the model recognises the prompt-injection pattern and declines.
-# We deliberately accept several phrasings (Qwen-0.5B has only ~30 prompts
-# to learn from, so the policy gets credit for any reasonable refusal style
-# rather than memorising one template).
+# We deliberately accept several phrasings (the policy sees only 114 prompts
+# built from 38 attack rows, so it gets credit for any reasonable refusal
+# style rather than memorising one template). The flip side: matching is on
+# surface strings, so "This looks suspicious." scores like a refusal.
 REFUSE_PATTERNS = [
     r"\bi (won'?t|will not|cannot|can'?t)\b",
     r"\bi (refuse|decline)\b",

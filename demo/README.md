@@ -17,24 +17,32 @@ This opens `http://localhost:8501`.
 
 ## What's on it
 
-The four tabs follow the story in the order it happened.
+The four tabs follow the story in the order it happened. The page states the reason for
+each decision in a sentence where it matters; the full list of fifteen design choices
+(why, what it cost, what I'd do with more time) sits in one collapsed table at the bottom
+of tab 1, built from `DESIGN_CHOICES` in `app.py`. Detail that supports a claim but isn't
+needed to follow it (the reply table, the scorer-cutoff chart, the eight problems, the
+ground-truth fixes, next steps) is collapsed by default.
 
-1. **Attack, defend, audit.** The attack in one example, why the project uses an email
-   agent (the tradeoff: checkable ground truth in exchange for a toy setting), the three
-   defenses, how RL training made the model refuse less (with a viewer for individual
-   completions), the four most important problems the self-audit found, and what I took
-   back.
+1. **Attack, defend, audit.** Opens with a project summary: what I built, why an email
+   agent, what it turned up, and four headline numbers. Then the three defenses with 95%
+   intervals, the adaptive attack on the hardened prompt and the check that showed it had
+   stopped doing the job, a chart of attack success against useful work, how RL training
+   made the model refuse less (training curve next to behaviour, plus a viewer for
+   individual completions), the self-audit, and what I took back.
 2. **Checking the judges.** Why LLM-judge scores matter beyond this project, how my own
    ground truth had to be fixed twice, and the three findings: the judges disagree about
    partial credit, the gap settles instead of growing during a search, and how well each
-   of seven judges picks the most dangerous attack.
+   of seven judges picks the most dangerous attack. Ends with advice for teams running
+   red-team evals with a judge, and what I'd do next.
 3. **Click an attack.** A map of 300 search attacks by risk and style. Click a cell, pick
-   an example, and follow it through four steps: the attack email, what the agent did,
-   what really happened, and what each judge said. A switch shows the stricter reading
-   that ignores judge credit for messages sent to colleagues.
-4. **Replay an attack.** Any of the 38 attacks under two defense setups side by side. The
-   default pairing, naive against hardened prompt, shows the one result no scoring choice
-   can change: zero destructive calls.
+   an example (it opens on a judge over-credit where the cell has one), and follow it
+   through four steps: the attack email, what the agent did, what really happened, and
+   what each judge said. A switch shows the stricter reading that ignores judge credit
+   for messages sent to colleagues.
+4. **Replay an attack.** Any of the 38 attacks under two defense setups side by side. Two
+   buttons load the evidence for two claims: the hardened prompt's zero destructive
+   calls, and the constant ~25 attempts that retracted "blocking makes the agent retry".
 
 The first three tabs open with the same collapsed glossary, *Terms used in this project*,
 which defines each specialist term that appears in the demo, so a reader with general ML
@@ -66,6 +74,7 @@ page. The first two tabs link to it.
 | 1 · defenses chart | `p0_summary.json`, `attack_{guard,verifier_only,combined}.json`, `benign_*.json` | `scripts/eval_p0.py`, `eval_combined.py` |
 | 1 · adaptive attack | `e2_analysis.json` | `scripts/e2_analyze.py` |
 | 1 · task completion under attack | `task_completion.json` (replays in `results/task_completion/`) | `scripts/task_completion.py` (API calls) |
+| 1 · RL evidence | `grpo_reward_curve.png`, `grpo_train.json`, `behavioral_attack_qwen-injection-sft.json`, `grpo_behavioral_attack.json` | `scripts_plot_grpo_curves.py`, `eval_grpo_attack.py` |
 | 1 · completion viewer | `grpo_behavioral_attack.json` | `eval_grpo_attack.py` |
 | 1 · scorer chart | `scorer_sensitivity.json` | `scripts/scorer_sensitivity.py` |
 | 1 · cost line | `reproduction_cost.json` | `scripts/reproduction_cost.py` |
