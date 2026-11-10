@@ -21,11 +21,11 @@ The four tabs follow the story in the order it happened. The page states the rea
 each decision in a sentence where it matters; the full list of fifteen design choices
 (why, what it cost, what I'd do with more time) sits in one collapsed table at the bottom
 of tab 1, built from `DESIGN_CHOICES` in `app.py`. Detail that supports a claim but isn't
-needed to follow it (the reply table, the scorer-cutoff chart, the eight problems, the
+needed to follow it (the reply table, the eight problems with the scorer-cutoff chart, the
 ground-truth fixes, next steps) is collapsed by default.
 
 1. **Attack, defend, audit.** Opens with a project summary: what I built, why an email
-   agent, what it turned up, and four headline numbers. Then the three defenses with 95%
+   agent, and the four findings as four headline numbers. Then the three defenses with 95%
    intervals, the adaptive attack on the hardened prompt and the check that showed it had
    stopped doing the job, a chart of attack success against useful work, how RL training
    made the model refuse less (training curve next to behaviour, plus a viewer for
@@ -38,15 +38,22 @@ ground-truth fixes, next steps) is collapsed by default.
 3. **Click an attack.** A map of 300 search attacks by risk and style. Click a cell, pick
    an example (it opens on a judge over-credit where the cell has one), and follow it
    through four steps: the attack email, what the agent did, what really happened, and
-   what each judge said. A switch shows the stricter reading that ignores judge credit
-   for messages sent to colleagues.
+   what each judge said. Step four puts the three judges side by side, each with a badge
+   (matches, over-credits, missed it, right outcome but wrong level) and a line describing
+   the calls its reason mentions, so the claim can be checked against the trace. A switch
+   shows the stricter reading that ignores judge credit for messages sent to colleagues.
 4. **Replay an attack.** Any of the 38 attacks under two defense setups side by side. Two
    buttons load the evidence for two claims: the hardened prompt's zero destructive
    calls, and the constant ~25 attempts that retracted "blocking makes the agent retry".
 
-The first three tabs open with the same collapsed glossary, *Terms used in this project*,
-which defines each specialist term that appears in the demo, so a reader with general ML
-background can follow them without leaving the page. The replay tab leaves it out.
+The first three tabs each open with a collapsed glossary, *Terms used on this page*, that
+holds only the groups of terms that tab uses (built from `GLOSSARY` in `app.py`), so a
+reader with general ML background can follow along without leaving the page. The replay
+tab leaves it out.
+
+The sentence in step three of *Click an attack* comes from `verdict_sentence` in
+`scripts/qd_atlas.py`, stored in `results/qd_atlas.json`. Re-run that script after changing
+its wording; it rewrites the file only if its self-checks pass.
 
 The statistics behind each claim (power calculations, the classifier threshold sweep,
 variance estimates, the full ledger of retractions) stay in the report rather than on the
