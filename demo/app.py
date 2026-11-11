@@ -397,9 +397,36 @@ def render_concept_diagram() -> None:
     concept = DIAGRAMS / "attack_concept_v2.png"
     if concept.exists():
         st.image(str(concept), width="stretch",
-                 caption="How it fits together. The attacker adds one email to the inbox; the "
-                         "agent reads all 26; the three defenses sit between the agent and its "
-                         "tools. Right: attack success with the naive and hardened prompts.")
+                 caption="The attacker adds one email to the inbox, the agent reads all 26, and "
+                         "the three defenses sit between the agent and its tools. DEFENSE 0 is "
+                         "the hardened prompt, GATE 1 the classifier, GATE 2 the RL verifier.")
+
+
+def render_pair_flow(n_seeds: int, n_emails: int) -> None:
+    """The red-team loop as a left-to-right flowchart. A DOT string, which
+    Streamlit draws in the browser, so the demo needs no extra dependency.
+    Mid-grey lines and filled boxes keep it readable on light and dark themes."""
+    grey = "#8a8a8a"
+    st.graphviz_chart(f"""
+    digraph pair {{
+        rankdir=LR; bgcolor="transparent"; nodesep=0.35; ranksep=0.45;
+        node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11,
+              color="{grey}", fillcolor="#f3f1ea", fontcolor="#1f1f1f", margin="0.12,0.07"];
+        edge [color="{grey}", fontcolor="{grey}", fontname="Helvetica", fontsize=10];
+        seed    [label="{n_seeds} hand-written\\nattack ideas"];
+        inject  [label="Put the email\\nin the inbox"];
+        run     [label="Agent works\\nthrough the inbox"];
+        worked  [label="Did the\\nattack work?", shape=diamond, fillcolor="#fff0b3",
+                 margin="0.02,0.02"];
+        rewrite [label="Attacker LLM reads the\\nagent's tool calls and\\nrewrites the email",
+                 fillcolor="#f6d5d5"];
+        keep    [label="Log every version:\\n{n_emails} attack emails", fillcolor="#d4e8d0"];
+        seed -> inject -> run -> worked;
+        worked -> keep    [label="yes, or no\\nrewrites left"];
+        worked -> rewrite [label="no"];
+        rewrite -> inject [label="up to 2 times"];
+    }}
+    """, width="stretch")
 
 
 def naive_destructive_per_replay() -> list[int]:
@@ -619,7 +646,7 @@ def render_overview() -> None:
     b, _ = st.columns([1, 3])
     b.link_button("Read the full report", REPORT_URL)
     render_glossary("setup", "defenses", "measuring", "stats", refs=True)
-    with st.expander("The attack in one example, and how the pieces fit"):
+    with st.expander("The attack in one example"):
         st.markdown(
             "Say you let an assistant read your inbox and reply, forward and delete for you. "
             "Someone sends you a normal-looking email with this buried in it:\n\n"
@@ -630,11 +657,27 @@ def render_overview() -> None:
             "all they did was send an email. With no defense, the agent here falls for it "
             "about 1 time in 3."
         )
-        render_concept_diagram()
 
     # ── 1 · defenses ────────────────────────────────────────────────
     st.divider()
     st.header("1 · Three defenses, and what the cheapest one really did")
+    # The threat-model picture opens the section in full view. It used to sit
+    # inside the collapsed example above, where most readers never saw it.
+    render_concept_diagram()
+
+    # Where the 38 attacks come from. Counted from the log, so the sentence
+    # stays true if the campaign is re-run.
+    rounds = Counter(r for _, r in load_attack_emails())
+    n_seeds, n_rewrites = rounds.get(0, 0), sum(v for k, v in rounds.items() if k > 0)
+    st.markdown(
+        "**Where the attacks come from.** I wrote "
+        f"{n_seeds} attack ideas by hand in three styles, then let an automated red team "
+        "(PAIR) rewrite the ones that failed. Every version is kept, failed ones included, "
+        f"which gives {n_seeds} originals plus {n_rewrites} rewrites: the "
+        f"{n_seeds + n_rewrites} attack emails every defense is replayed on. Two rewrite "
+        "rounds is fewer than PAIR normally uses, so these are fairly weak attacks."
+    )
+    render_pair_flow(n_seeds, n_seeds + n_rewrites)
     st.markdown(
         "The hardened prompt is free, the classifier adds about 5 ms per risky action, and "
         "the RL verifier about a second plus its training. All three guard the destructive "

@@ -25,8 +25,11 @@ needed to follow it (the reply table, the eight problems with the scorer-cutoff 
 ground-truth fixes, next steps) is collapsed by default.
 
 1. **Attack, defend, audit.** Opens with a project summary: what I built, why an email
-   agent, and the four findings as four headline numbers. Then the three defenses with 95%
-   intervals, the adaptive attack on the hardened prompt and the check that showed it had
+   agent, and the four findings as four headline numbers. Section 1 starts with the
+   threat-model diagram (who attacks, what the agent reads, where each defense sits), then
+   says where the 38 attack emails come from, with a small flowchart of the PAIR loop: 30
+   hand-written ideas, each rewritten up to twice when it fails. Then the three defenses
+   with 95% intervals, the adaptive attack on the hardened prompt and the check that showed it had
    stopped doing the job, a chart of attack success against useful work, how RL training
    made the model refuse less (training curve next to behaviour, plus a viewer for
    individual completions), the self-audit, and what I took back.
@@ -56,6 +59,9 @@ The sentence in step three of *Click an attack* comes from `verdict_sentence` in
 `scripts/qd_atlas.py`, stored in `results/qd_atlas.json`. Re-run that script after changing
 its wording; it rewrites the file only if its self-checks pass.
 
+The PAIR flowchart is a Graphviz DOT string passed to `st.graphviz_chart`, which draws it
+in the browser, so it adds no dependency.
+
 The statistics behind each claim (power calculations, the classifier threshold sweep,
 variance estimates, the full ledger of retractions) stay in the report rather than on the
 page. The first two tabs link to it.
@@ -79,6 +85,8 @@ page. The first two tabs link to it.
 
 | Tab | Files | Regenerate with |
 |---|---|---|
+| 1 · threat-model diagram | `docs/diagrams/attack_concept_v2.png` | `docs/diagrams/make_concept_v2.py` |
+| 1 · PAIR flowchart | drawn in `app.py` (`render_pair_flow`); counts from `data/attack_log.jsonl` | `src/redteam.py` (API calls) |
 | 1 · defenses chart | `p0_summary.json`, `attack_{guard,verifier_only,combined}.json`, `benign_*.json` | `scripts/eval_p0.py`, `eval_combined.py` |
 | 1 · adaptive attack | `e2_analysis.json` | `scripts/e2_analyze.py` |
 | 1 · task completion under attack | `task_completion.json` (replays in `results/task_completion/`) | `scripts/task_completion.py` (API calls) |
