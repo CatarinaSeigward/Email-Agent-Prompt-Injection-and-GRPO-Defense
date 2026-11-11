@@ -33,8 +33,8 @@ ground-truth fixes, next steps) is collapsed by default.
 2. **Checking the judges.** Why LLM-judge scores matter beyond this project, how my own
    ground truth had to be fixed twice, and the three findings: the judges disagree about
    partial credit, the gap settles instead of growing during a search, and how well each
-   of seven judges picks the most dangerous attack. Ends with advice for teams running
-   red-team evals with a judge, and what I'd do next.
+   of seven judges picks the most dangerous attack. Ends with the main limit (the search
+   ran once) and what I'd do next.
 3. **Click an attack.** A map of 300 search attacks by risk and style. Click a cell, pick
    an example (it opens on a judge over-credit where the cell has one), and follow it
    through four steps: the attack email, what the agent did, what really happened, and
@@ -45,6 +45,7 @@ ground-truth fixes, next steps) is collapsed by default.
 4. **Replay an attack.** Any of the 38 attacks under two defense setups side by side. Two
    buttons load the evidence for two claims: the hardened prompt's zero destructive
    calls, and the constant ~25 attempts that retracted "blocking makes the agent retry".
+   The note under the comparison is the one the chosen pairing is evidence for.
 
 The first three tabs each open with a collapsed glossary, *Terms used on this page*, that
 holds only the groups of terms that tab uses (built from `GLOSSARY` in `app.py`), so a
